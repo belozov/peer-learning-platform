@@ -1,24 +1,28 @@
 # Explainable Learner Compatibility & Matching Rules
 
-## 1. Mathematical Formulation & Philosophy
+## 1. Mathematical Formulation & Design Philosophy
 
 ### 1.1 Compatibility Model Overview
-The platform rejects black-box machine learning and opaque psychometric heuristics in favor of a **deterministic, auditable, and explainable multi-attribute scoring model**. Compatibility reflects the alignment of concrete study attributes between two learners within a specific subject domain.
+The platform employs a **deterministic, auditable, and explainable multi-attribute scoring model** rather than an opaque machine-learning model. This choice is an engineering decision suited for small early datasets and full user transparency: each recommendation can be inspected and understood directly by learners.
 
 $$\text{Score} = 100 \times \Big( 0.40 \cdot T + 0.35 \cdot G + 0.25 \cdot L \Big)$$
 
-> **Design Rule Classification**: The weights ($0.40, 0.35, 0.25$), normalized goal categories, and 3-tier level descriptors are **Proposed starting hypotheses**, established for transparent validation during empirical user testing.
+> **Design Rule Classification**: The weights ($0.40, 0.35, 0.25$), normalized goal categories, and 3-tier level descriptors are **Proposed starting hypotheses** for empirical testing, not validated psychological or pedagogical constants.
+
+### 1.2 Score Display & Rounding Convention
+- Compatibility scores are expressed as points out of 100 (e.g., `Compatibility Score: 67.5 / 100`), **not as percentages** (e.g., avoid `67.5%`), to prevent users from misinterpreting the score as a statistical probability of session success.
+- Scores are computed using double-precision floating-point arithmetic and rounded to **one decimal place** for user display.
 
 ---
 
-## 2. Hard Eligibility Conditions (Pre-Scoring Gating)
+## 2. Hard Eligibility Conditions (Pre-Scoring Filtering)
 
-A study listing is evaluated by the scoring engine **only if** it satisfies all seven hard eligibility conditions. If any condition fails, the listing is excluded from the compatibility view:
+A study listing is evaluated by the compatibility scoring engine **only if** it satisfies all seven hard eligibility conditions. If any condition fails, the listing is excluded from the compatibility feed.
 
 ```mermaid
 flowchart TD
     Start["Candidate Listing in Channel"] --> C1{"Channel Member?"}
-    C1 -- No --> Exclude["EXCLUDED from Compatibility View"]
+    C1 -- No --> Exclude["EXCLUDED from Compatibility Feed"]
     C1 -- Yes --> C2{"Status == 'open' & Future Start?"}
     C2 -- No --> Exclude
     C2 -- Yes --> C3{"Viewer != Author?"}
@@ -27,118 +31,128 @@ flowchart TD
     C4 -- No --> Exclude
     C4 -- Yes --> C5{"Language Match?"}
     C5 -- No --> Exclude
-    C5 -- Yes --> C6{"Full Availability Overlap?"}
+    C5 -- Yes --> C6{"Full Availability Overlap [start, end)?"}
     C6 -- No --> Exclude
-    C6 -- Yes --> C7{"No Overlapping Accepted Sessions?"}
+    C6 -- Yes --> C7{"No Schedule Collisions?"}
     C7 -- No --> Exclude
     C7 -- Yes --> Compute["Compute Compatibility Score (T, G, L)"]
 ```
 
-### 2.1 Hard Eligibility Criteria
-1. **Channel Membership**: The viewer must be an active member of the channel hosting the listing (FR-04).
+### 2.1 Eligibility Invariants
+1. **Channel Membership Gate**: The viewing learner must be a member of the topic channel hosting the listing.
 2. **Temporal Validity**: Listing status must be `open`, and `scheduled_start_time > current_server_time_utc`.
 3. **Self-Exclusion**: A learner cannot match with or respond to their own listing (`viewer_id != author_id`).
-4. **Safety & Blocking**: Neither learner has an active block entry against the other (`user_blocks` check).
-5. **Language Overlap**: The listing's designated language must exist in the viewer's declared spoken languages array.
-6. **Full Temporal Overlap**: The viewer's registered weekly availability slots must **completely cover** the scheduled session window:
-   $$[\text{start}_{\text{listing}}, \text{start}_{\text{listing}} + \text{duration}_{\text{listing}}] \subseteq \text{Availability}_{\text{viewer}}$$
-7. **No Schedule Collision**: Neither the listing author nor the viewer has an already accepted session overlapping that time interval.
+4. **Safety & Blocking**: Neither learner has placed an active block on the other (`user_blocks` check).
+5. **Language Match**: The listing's designated language must be included in the viewing learner's declared spoken languages array.
+6. **Full Availability Overlap (Half-Open Intervals)**: The listing's scheduled interval must be completely enclosed within the viewing learner's declared availability. Intervals are modeled as **half-open $[t_{\text{start}}, t_{\text{end}})$**:
+   $$[t_{\text{start}}, t_{\text{start}} + \text{duration}) \subseteq \text{Availability}_{\text{viewer}}$$
+   *Half-open intervals guarantee that adjacent back-to-back sessions (e.g., 14:00–15:00 and 15:00–16:00) do not create false collision errors.*
+7. **No Schedule Collision**: Neither the listing author nor the viewer has an accepted session overlapping $[t_{\text{start}}, t_{\text{start}} + \text{duration})$.
 
-> **Rationale**: Language proficiency and meeting time are non-negotiable logistical gates, not bonus points. A perfect topic match cannot compensate for an impossible meeting time or a language barrier.
+### 2.2 Controlled Evaluation Consistency Rule
+To evaluate the true effect of compatibility ranking versus chronological ordering (RQ1):
+- **Identical Eligibility Rule**: In empirical testing, both the **Chronological (Baseline)** condition and the **Compatibility (Experimental)** condition must apply the **exact same hard eligibility filters** (Conditions 1–7 above).
+- The only independent variable between conditions is the **ordering** of eligible listings:
+  - *Chronological Condition*: Eligible listings sorted by `created_at DESC` (or `scheduled_start_time ASC`).
+  - *Compatibility Condition*: Eligible listings sorted by `Score DESC`.
+- **Broader Browsing**: Browsing listings with relaxed language or schedule filters is a separate, user-initiated exploration mode and must not be conflated with the baseline chronological evaluation.
 
 ---
 
 ## 3. Factor Computation ($T, G, L$)
 
-### 3.1 Topic Fit ($T$)
-The topic fit measures keyword and sub-concept overlap within the parent channel domain using the Jaccard similarity coefficient:
-$$T = \frac{|V_{\text{topics}} \cap L_{\text{topics}}|}{|V_{\text{topics}} \cup L_{\text{topics}}|}$$
-Where:
-- $V_{\text{topics}}$ is the set of topic tags selected by the viewing learner.
-- $L_{\text{topics}}$ is the set of topic tags specified on the study listing.
+### 3.1 Required Inputs for Ranking
+Compatibility ranking requires valid input vectors from both parties:
+- **Viewer Inputs**: Selected topic preference tags ($V_{\text{topics}}$), topic-specific knowledge level ($\text{Level}_{\text{viewer}}$), and declared study goal category ($\text{Category}_{\text{viewer}}$).
+- **Listing Inputs**: Topic tags ($L_{\text{topics}} \ge 1$), author knowledge level ($\text{Level}_{\text{author}}$), and target goal category ($\text{Category}_{\text{listing}}$).
 
-#### Handling Empty Topic Tags
-- **Rule**: Study listings require at least one structured topic tag upon creation (FR-06).
-- If a viewing learner browses without selecting preferred topic tags, $T$ is assigned a neutral baseline score:
-  $$T = 0.50 \quad \text{(with UI notice: 'General topic match within channel')}$$
+#### Missing Preference Handling
+- If a viewing learner has **not configured** their topic preference tags, knowledge level, or goal category:
+  - **No invented or default scores are computed** (e.g., setting $T=0.50$ is prohibited).
+  - Compatibility ranking is disabled for that query.
+  - The UI presents an inline advisory: *"Complete your study preferences for this topic to unlock compatibility scores."*
+  - The listing feed falls back gracefully to standard chronological ordering.
 
 ---
 
-### 3.2 Goal Fit ($G$)
-Goal fit evaluates pedagogical alignment based on four standardized learning goal categories:
-1. `understanding_concept`: Foundational theory, debugging difficult syntax, or conceptual explanations.
-2. `practicing_exercises`: Solving algorithm problems, conversational drills, or textbook exercises.
-3. `preparing_assessment`: Exam revision, mock technical interview, or quiz preparation.
-4. `completing_project`: Pair programming on a portfolio project or practical coursework assignment.
+### 3.2 Topic Fit ($T$)
+Topic fit measures sub-concept overlap within the parent channel using the Jaccard similarity coefficient:
+$$T = \frac{|V_{\text{topics}} \cap L_{\text{topics}}|}{|V_{\text{topics}} \cup L_{\text{topics}}|}$$
+- Where $V_{\text{topics}}$ is the non-empty set of viewer preference tags, and $L_{\text{topics}}$ is the non-empty set of listing tags.
+- Range: $T \in [0.0, 1.0]$.
+- Listings require at least one structured tag upon creation.
 
-#### Goal Fit Calculation
+---
+
+### 3.3 Goal Fit ($G$)
+Goal fit evaluates pedagogical alignment based on four normalized categories:
+1. `understanding_concept`: Foundational concepts, syntax debugging, theory.
+2. `practicing_exercises`: Solving algorithm problems, conversation practice, drills.
+3. `preparing_assessment`: Exam revision, mock technical interview, quiz review.
+4. `completing_project`: Pair programming on coursework, portfolio projects.
+
 $$G = \begin{cases} 
 1.0 & \text{if } \text{Category}_{\text{viewer}} = \text{Category}_{\text{listing}} \\ 
 0.0 & \text{if } \text{Category}_{\text{viewer}} \ne \text{Category}_{\text{listing}} 
 \end{cases}$$
 
-> **Note**: Specific textual goal details (e.g., *"Focusing on binary tree traversals"*) remain prominently visible in the listing card for human qualitative review.
-
 ---
 
-### 3.3 Level Fit ($L$)
-To ensure independent assessments across disciplines, knowledge levels are self-reported **per topic** (e.g., a learner's Python level is completely decoupled from their English level):
-- **Level 1**: Beginner (learning fundamental syntax/rules).
-- **Level 2**: Intermediate (capable of independent practice; encountering complex patterns).
-- **Level 3**: Advanced (deep conceptual mastery; seeking optimization or advanced discussion).
-
-#### Level Fit Calculation
+### 3.4 Level Fit ($L$)
+Topic knowledge levels are self-reported on a 3-tier scale (1: Beginner, 2: Intermediate, 3: Advanced):
 $$L = \begin{cases} 
 1.0 & \text{if } |\text{Level}_{\text{viewer}} - \text{Level}_{\text{listing}}| = 0 \quad (\text{Exact match}) \\ 
-0.5 & \text{if } |\text{Level}_{\text{viewer}} - \text{Level}_{\text{listing}}| = 1 \quad (\text{Adjacent peer / Proximal zone}) \\ 
-0.0 & \text{if } |\text{Level}_{\text{viewer}} - \text{Level}_{\text{listing}}| \ge 2 \quad (\text{Disparate levels}) 
+0.5 & \text{if } |\text{Level}_{\text{viewer}} - \text{Level}_{\text{listing}}| = 1 \quad (\text{Adjacent level}) \\ 
+0.0 & \text{if } |\text{Level}_{\text{viewer}} - \text{Level}_{\text{listing}}| \ge 2 \quad (\text{Two levels apart}) 
 \end{cases}$$
 
-> **Pedagogical Basis**: Adjacent levels ($L=0.5$) are intentionally awarded partial credit based on Vygotsky's Zone of Proximal Development (ZPD), acknowledging that studying with a slightly more advanced or slightly less advanced peer provides reciprocal cognitive scaffolding.
+> **Conceptual Framing**: Adjacent-level scoring ($L=0.5$) is an engineering design choice inspired by Vygotskian peer-scaffolding concepts (Zone of Proximal Development). The numerical score ($0.5$) is a working hypothesis to be validated or refined through user feedback.
 
 ---
 
-## 4. Edge-Case Behaviors & System Invariants
+## 4. Concrete Arithmetic Fixtures & Examples
 
-| Scenario | Edge-Case Rule |
-| :--- | :--- |
-| **Missing Learner Preferences** | The UI disables the compatibility ranking tab, displays a prominent banner (*"Complete your study preferences to unlock compatibility matching"*), and defaults to chronological ordering. No speculative or fabricated score is displayed. |
-| **Zero Compatibility Matches** | The system explicitly displays which specific filters eliminated candidate listings (e.g., *"3 open listings exist, but none match your English language filter"*). Users may explicitly switch to broad browsing; the system **never silently relaxes filters**. |
-| **Partial Time Overlap** | Excluded from the strict compatibility feed. If viewed in broad browsing, an alert tag *"Partial Availability Overlap (Only 15 of 45 min)"* is rendered. |
-| **Different Timezones** | All scheduled timestamps are stored in UTC. The UI renders both the user's local time and the author's local time with explicit timezone abbreviations (e.g., `18:00 UTC+5 / 13:00 UTC`). |
-| **Equal Scores (Tie-Breaking)** | Tied compatibility scores are broken deterministically: first by earliest `scheduled_start_time` (most imminent session first), then by stable alphanumeric `listing_id`. |
-| **Listing Parameter Mutation** | *(Proposed Rule)*: Once at least one active response has been submitted to a listing, the fields `topic`, `goal`, `level`, `scheduled_start_time`, `duration`, and `language` are **locked against editing**. If changes are needed, the author must cancel the listing and create a new one. |
-| **Repeated Study Partners** | Previous session history or accumulated peer reviews do **not** inflate or boost compatibility scores. This prevents algorithmic nepotism and preserves fair discovery for new learners. |
+The following deterministic test fixtures govern calculation and display:
+
+### Fixture A: Perfect Multi-Attribute Match
+- **Inputs**: $V_{\text{topics}} = \{\text{asyncio, fastapi}\}$, $L_{\text{topics}} = \{\text{asyncio, fastapi}\}$; identical goal (`completing_project`); both Level 2 (Intermediate).
+- **Factor Values**: $T = \frac{2}{2} = 1.0$, $G = 1.0$, $L = 1.0$.
+- **Calculation**:
+  $$\text{Score} = 100 \times (0.40 \cdot 1.0 + 0.35 \cdot 1.0 + 0.25 \cdot 1.0) = 100 \times 1.0 = 100.0$$
+- **UI Output**: `Compatibility Score: 100.0 / 100`
+- **Explanation**: *"Identical topic focus, shared study goal, same knowledge level, shared language, full schedule overlap."*
+
+### Fixture B: Partial Topic & Adjacent Level with Shared Goal
+- **Inputs**: $V_{\text{topics}} = \{\text{derivatives, limits}\}$, $L_{\text{topics}} = \{\text{derivatives, integrals}\}$; identical goal (`practicing_exercises`); viewer Level 1 (Beginner), author Level 2 (Intermediate).
+- **Factor Values**: $T = \frac{|\{\text{derivatives}\}|}{|\{\text{derivatives, limits, integrals}\}|} = \frac{1}{3} \approx 0.3333$, $G = 1.0$, $L = 0.5$ (adjacent).
+- **Calculation**:
+  $$\text{Score} = 100 \times \Big( 0.40 \cdot \frac{1}{3} + 0.35 \cdot 1.0 + 0.25 \cdot 0.5 \Big) = 100 \times (0.1333 + 0.3500 + 0.1250) = 60.8333... \approx 60.8$$
+- **UI Output**: `Compatibility Score: 60.8 / 100`
+- **Explanation**: *"Overlapping topic tags, shared study goal, adjacent knowledge level, shared language, full schedule overlap."*
+
+### Fixture C: Half Topic Overlap, Different Goal, Adjacent Level
+- **Inputs**: $T = 0.50$, $G = 0.0$ (different goal categories), $L = 0.5$ (adjacent level).
+- **Calculation**:
+  $$\text{Score} = 100 \times (0.40 \cdot 0.50 + 0.35 \cdot 0.0 + 0.25 \cdot 0.50) = 100 \times (0.2000 + 0.0000 + 0.1250) = 32.5$$
+- **UI Output**: `Compatibility Score: 32.5 / 100`
+- **Explanation**: *"Overlapping topic tags, different study goal, adjacent knowledge level, shared language, full schedule overlap."*
+
+### Fixture D: Disparate Level, Different Goal, Low Topic Overlap
+- **Inputs**: $T = 0.25$, $G = 0.0$, $L = 0.0$ (two levels apart: Beginner vs. Advanced).
+- **Calculation**:
+  $$\text{Score} = 100 \times (0.40 \cdot 0.25 + 0.35 \cdot 0.0 + 0.25 \cdot 0.0) = 100 \times 0.1000 = 10.0$$
+- **UI Output**: `Compatibility Score: 10.0 / 100`
+- **Explanation**: *"Partial topic overlap, different study goal, different knowledge level, shared language, full schedule overlap."*
 
 ---
 
-## 5. Human-Readable Explanation Generation
+## 5. Edge-Case Resolution Matrix
 
-Every ranked listing generates an auditable, decomposed justification string alongside its aggregate score:
-
-### Template Logic
-```typescript
-function generateExplanation(T: number, G: number, L: number, lang: string): string {
-  const topicDesc = T === 1.0 ? "Identical topic focus" : T >= 0.5 ? "Overlapping topic tags" : "General domain match";
-  const goalDesc = G === 1.0 ? "Shared study goal" : "Different study goal";
-  const levelDesc = L === 1.0 ? "Same knowledge level" : L === 0.5 ? "Adjacent knowledge level" : "Different level";
-  
-  return `${topicDesc}, ${goalDesc}, ${levelDesc}, shared ${lang}, full schedule overlap.`;
-}
-```
-
-### Concrete Explanation Examples
-
-1. **High Compatibility Score ($95\%$)**:
-   - *Score Calculation*: $100 \times (0.40 \cdot 1.0 + 0.35 \cdot 1.0 + 0.25 \cdot 0.8) \approx 95\%$
-   - *Displayed Explanation*:  
-     `[95% Match] — Identical topic focus (Python: Asyncio, FastAPI), shared study goal (Completing Project), same knowledge level (Intermediate), shared language (English), full schedule overlap.`
-
-2. **Moderate Compatibility Score ($62\%$)**:
-   - *Score Calculation*: $100 \times (0.40 \cdot 0.5 + 0.35 \cdot 0.0 + 0.25 \cdot 0.5) = 100 \times (0.20 + 0.00 + 0.125) \approx 33\%$ *(or with goal match: $67\%$)*
-   - *Displayed Explanation*:  
-     `[67% Match] — Overlapping topic tags (Calculus: Derivatives), shared study goal (Practicing Exercises), adjacent knowledge level (Beginner to Intermediate), shared language (Kazakh), full schedule overlap.`
-
-3. **Broad Browse (Ineligible for Strict Compatibility)**:
-   - *Displayed Notice*:  
-     `[Ineligible for Strict Compatibility] — Schedule Mismatch: Listing scheduled for Tuesday 14:00 UTC (Outside your declared availability window).`
+| Edge Case | Specification Rule | Observable Behavior |
+| :--- | :--- | :--- |
+| **Missing Preferences** | Scoring disabled; no invented or default values allowed. | UI suppresses score column, displays inline prompt to complete preferences, and orders listings chronologically. |
+| **Zero Matches** | Filtering criteria strictly preserved; no silent relaxation. | UI displays: *"No listings match your current filters (Language: X, Schedule: Y)."* Options provided to explicitly broaden search. |
+| **Partial Time Overlap** | Strict compatibility excludes partial overlap. | In broad browse mode, rendered with warning badge: *"Partial Time Overlap (Only 20 of 45 min)"*. |
+| **Tie-Breaking** | Deterministic secondary sort. | Equal scores ordered by earliest `scheduled_start_time ASC`, then stable alphanumeric `id ASC`. |
+| **Post-Response Editing** | Listing parameter immutability. | Once a response is submitted, core listing fields (`topic`, `goal`, `level`, `start_time`, `duration`, `language`) are locked against modification. Author must cancel listing to alter parameters. |
+| **Repeated Partners** | Algorithmic neutrality. | Accumulated reviews or prior sessions do not boost compatibility score, preventing favoritism. |

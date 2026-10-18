@@ -161,7 +161,8 @@ Structured study requests published by channel members (FR-06, FR-07).
 | `topic_tags` | `TEXT[]` | `NOT NULL CHECK (cardinality(topic_tags) > 0)` | Structured sub-topic tags. |
 | `goal_category` | `VARCHAR(64)` | `NOT NULL CHECK (goal_category IN ('understanding_concept', 'practicing_exercises', 'preparing_assessment', 'completing_project'))` | Normalized goal enum. |
 | `goal_details` | `TEXT` | `NULL` | Free-text goal specifics for human inspection. |
-| `target_level` | `SMALLINT` | `NOT NULL CHECK (target_level IN (1, 2, 3))` | Knowledge level requested. |
+| `author_level` | `SMALLINT` | `NOT NULL CHECK (author_level IN (1, 2, 3))` | Author's declared topic knowledge level. |
+| `target_level` | `SMALLINT` | `NULL CHECK (target_level IN (1, 2, 3))` | Optional desired peer knowledge level. |
 | `language` | `VARCHAR(16)` | `NOT NULL` | Required communication language. |
 | `scheduled_start_time`| `TIMESTAMPTZ` | `NOT NULL` | Planned session start in UTC. |
 | `duration_minutes` | `SMALLINT` | `NOT NULL CHECK (duration_minutes BETWEEN 15 AND 180)` | Planned session duration. |

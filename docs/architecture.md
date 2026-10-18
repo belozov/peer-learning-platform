@@ -141,10 +141,12 @@ To satisfy data integrity requirements (NFR-02), two critical database workflows
 ### 4.1 Concurrent Listing Acceptance Workflow
 When a listing author accepts a respondent, concurrent acceptance requests must be serialized to prevent double-booking or duplicate sessions:
 ```sql
+-- Specification Pseudocode (Atomic Acceptance Routine)
 BEGIN TRANSACTION ISOLATION LEVEL READ COMMITTED;
 
   -- 1. Acquire exclusive row-level lock on the listing
-  SELECT id, status, author_id FROM study_listings 
+  SELECT id, status, author_id, channel_id, scheduled_start_time, duration_minutes 
+  FROM study_listings 
   WHERE id = :listing_id FOR UPDATE;
 
   -- 2. Verify listing is still open
@@ -153,20 +155,44 @@ BEGIN TRANSACTION ISOLATION LEVEL READ COMMITTED;
     RAISE EXCEPTION 'Listing is no longer open for acceptance';
   END IF;
 
-  -- 3. Transition listing status
+  -- 3. Verify respondent has pending response and neither party has blocked the other
+  PERFORM 1 FROM listing_responses lr
+  WHERE lr.id = :response_id AND lr.listing_id = :listing_id AND lr.status = 'pending'
+    AND NOT EXISTS (
+      SELECT 1 FROM user_blocks ub 
+      WHERE (ub.blocker_id = study_listings.author_id AND ub.blocked_id = lr.respondent_id)
+         OR (ub.blocker_id = lr.respondent_id AND ub.blocked_id = study_listings.author_id)
+    );
+  IF NOT FOUND THEN
+    ROLLBACK;
+    RAISE EXCEPTION 'Respondent response is invalid or communication is blocked';
+  END IF;
+
+  -- 4. Verify neither participant has conflicting accepted sessions across any listing
+  PERFORM 1 FROM study_sessions s
+  WHERE (s.user_a_id IN (study_listings.author_id, :respondent_id) OR s.user_b_id IN (study_listings.author_id, :respondent_id))
+    AND s.status IN ('scheduled', 'active')
+    AND tsrange(s.scheduled_start_time, s.scheduled_start_time + (s.duration_minutes * INTERVAL '1 minute')) &&
+        tsrange(study_listings.scheduled_start_time, study_listings.scheduled_start_time + (study_listings.duration_minutes * INTERVAL '1 minute'));
+  IF FOUND THEN
+    ROLLBACK;
+    RAISE EXCEPTION 'Schedule collision detected for one of the participants';
+  END IF;
+
+  -- 5. Transition listing status
   UPDATE study_listings SET status = 'matched' WHERE id = :listing_id;
 
-  -- 4. Mark accepted response
+  -- 6. Mark accepted response
   UPDATE listing_responses SET status = 'accepted' WHERE id = :response_id;
 
-  -- 5. Automatically decline all other candidate responses
+  -- 7. Automatically decline all other candidate responses
   UPDATE listing_responses 
   SET status = 'declined' 
   WHERE listing_id = :listing_id AND id != :response_id AND status = 'pending';
 
-  -- 6. Initialize scheduled session
+  -- 8. Initialize scheduled session
   INSERT INTO study_sessions (listing_id, user_a_id, user_b_id, status, scheduled_start_time, duration_minutes)
-  VALUES (:listing_id, :author_id, :respondent_id, 'scheduled', :start_time, :duration);
+  VALUES (:listing_id, study_listings.author_id, :respondent_id, 'scheduled', study_listings.scheduled_start_time, study_listings.duration_minutes);
 
 COMMIT;
 ```

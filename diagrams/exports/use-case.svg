@@ -1,0 +1,148 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1150 780" width="100%" height="100%" style="background:#ffffff; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <defs>
+    <marker id="uc-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#64748b" />
+    </marker>
+    <marker id="uc-arrow-dash" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#0284c7" />
+    </marker>
+    <filter id="uc-shadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#0f172a" flood-opacity="0.05"/>
+    </filter>
+  </defs>
+
+  <!-- Header -->
+  <rect x="0" y="0" width="1150" height="70" fill="#0f172a" />
+  <text x="30" y="38" fill="#ffffff" font-size="20" font-weight="700">Use Case Diagram: Compatibility-Based Peer Learning Platform</text>
+  <text x="30" y="58" fill="#94a3b8" font-size="13">Functional Scenarios, Actor Contexts, and Membership/Integrity Invariants</text>
+
+  <!-- System Boundary Container -->
+  <rect x="230" y="90" width="890" height="660" rx="12" fill="#f8fafc" stroke="#0284c7" stroke-width="2" stroke-dasharray="6 4" filter="url(#uc-shadow)"/>
+  <text x="250" y="118" fill="#0369a1" font-size="13" font-weight="700" letter-spacing="1">SYSTEM BOUNDARY: PEER LEARNING APPLICATION</text>
+
+  <!-- Group 1: Identity & Profiles -->
+  <rect x="250" y="135" width="410" height="155" rx="8" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1"/>
+  <text x="265" y="155" fill="#1e40af" font-size="12" font-weight="700">IDENTITY &amp; PREFERENCES</text>
+  
+  <rect x="270" y="165" width="370" height="32" rx="16" fill="#ffffff" stroke="#3b82f6" stroke-width="1.2"/>
+  <text x="455" y="186" fill="#0f172a" font-size="12" font-weight="600" text-anchor="middle">UC-01: Register &amp; Authenticate Account</text>
+
+  <rect x="270" y="205" width="370" height="32" rx="16" fill="#ffffff" stroke="#3b82f6" stroke-width="1.2"/>
+  <text x="455" y="226" fill="#0f172a" font-size="12" font-weight="600" text-anchor="middle">UC-02: Configure Preferences (Topic Levels, Availability)</text>
+
+  <rect x="270" y="245" width="370" height="32" rx="16" fill="#ffffff" stroke="#3b82f6" stroke-width="1.2"/>
+  <text x="455" y="266" fill="#0f172a" font-size="12" font-weight="600" text-anchor="middle">UC-03: Manage Privacy Toggles &amp; History</text>
+
+  <!-- Group 2: Communities & Channels -->
+  <rect x="680" y="135" width="420" height="155" rx="8" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1"/>
+  <text x="695" y="155" fill="#15803d" font-size="12" font-weight="700">COMMUNITIES &amp; TOPIC CHANNELS</text>
+
+  <rect x="700" y="165" width="380" height="32" rx="16" fill="#ffffff" stroke="#22c55e" stroke-width="1.2"/>
+  <text x="890" y="186" fill="#0f172a" font-size="12" font-weight="600" text-anchor="middle">UC-04: Browse Community &amp; Channel Catalog</text>
+
+  <rect x="700" y="205" width="380" height="32" rx="16" fill="#ffffff" stroke="#22c55e" stroke-width="1.2"/>
+  <text x="890" y="226" fill="#0f172a" font-size="12" font-weight="600" text-anchor="middle">UC-05: Join / Leave Topic Channel (Gate Action)</text>
+
+  <rect x="700" y="245" width="380" height="32" rx="16" fill="#ffffff" stroke="#22c55e" stroke-width="1.2"/>
+  <text x="890" y="266" fill="#0f172a" font-size="12" font-weight="600" text-anchor="middle">UC-06: Publish &amp; Read Categorized Discussion Posts</text>
+
+  <!-- Group 3: Study Listings & Compatibility Discovery -->
+  <rect x="250" y="305" width="410" height="215" rx="8" fill="#fefce8" stroke="#fef08a" stroke-width="1"/>
+  <text x="265" y="325" fill="#854d0e" font-size="12" font-weight="700">STUDY LISTINGS &amp; COMPATIBILITY MATCHING</text>
+
+  <rect x="270" y="335" width="370" height="32" rx="16" fill="#ffffff" stroke="#eab308" stroke-width="1.2"/>
+  <text x="455" y="356" fill="#0f172a" font-size="12" font-weight="600" text-anchor="middle">UC-07: Create Study Listing (Goal, Topic, Level, Time)</text>
+
+  <rect x="270" y="375" width="370" height="32" rx="16" fill="#ffffff" stroke="#eab308" stroke-width="1.2"/>
+  <text x="455" y="396" fill="#0f172a" font-size="12" font-weight="600" text-anchor="middle">UC-08: Browse &amp; Rank Listings by Compatibility (T, G, L)</text>
+
+  <rect x="270" y="415" width="370" height="32" rx="16" fill="#ffffff" stroke="#eab308" stroke-width="1.2"/>
+  <text x="455" y="436" fill="#0f172a" font-size="12" font-weight="600" text-anchor="middle">UC-09: Inspect Match Explanation Badge</text>
+
+  <rect x="270" y="455" width="370" height="32" rx="16" fill="#ffffff" stroke="#eab308" stroke-width="1.2"/>
+  <text x="455" y="476" fill="#0f172a" font-size="12" font-weight="600" text-anchor="middle">UC-10: Respond to Listing / Withdraw Response</text>
+
+  <!-- Group 4: Sessions, Chat & Accounting -->
+  <rect x="680" y="305" width="420" height="255" rx="8" fill="#faf5ff" stroke="#e9d5ff" stroke-width="1"/>
+  <text x="695" y="325" fill="#6b21a8" font-size="12" font-weight="700">SESSION CHAT, ACCOUNTING &amp; OUTCOMES</text>
+
+  <rect x="700" y="335" width="380" height="32" rx="16" fill="#ffffff" stroke="#a855f7" stroke-width="1.2"/>
+  <text x="890" y="356" fill="#0f172a" font-size="12" font-weight="600" text-anchor="middle">UC-11: Accept 1 Respondent &amp; Lock Session</text>
+
+  <rect x="700" y="375" width="380" height="32" rx="16" fill="#ffffff" stroke="#a855f7" stroke-width="1.2"/>
+  <text x="890" y="396" fill="#0f172a" font-size="12" font-weight="600" text-anchor="middle">UC-12: Join &amp; Start Session (Guard: now &gt;= scheduled_start)</text>
+
+  <rect x="700" y="415" width="380" height="32" rx="16" fill="#ffffff" stroke="#a855f7" stroke-width="1.2"/>
+  <text x="890" y="436" fill="#0f172a" font-size="12" font-weight="600" text-anchor="middle">UC-13: Synchronous Text Chat &amp; 60s Disconnect Grace</text>
+
+  <rect x="700" y="455" width="380" height="32" rx="16" fill="#ffffff" stroke="#a855f7" stroke-width="1.2"/>
+  <text x="890" y="476" fill="#0f172a" font-size="12" font-weight="600" text-anchor="middle">UC-14: Track 180m Daily Study Allowance (UTC Reset)</text>
+
+  <rect x="700" y="495" width="380" height="32" rx="16" fill="#ffffff" stroke="#a855f7" stroke-width="1.2"/>
+  <text x="890" y="516" fill="#0f172a" font-size="12" font-weight="600" text-anchor="middle">UC-15: Confirm Mutual Outcomes / Review (&gt;= 5m)</text>
+
+  <!-- Group 5: Safety & Administration -->
+  <rect x="250" y="535" width="850" height="195" rx="8" fill="#fff1f2" stroke="#fecdd3" stroke-width="1"/>
+  <text x="265" y="555" fill="#9f1239" font-size="12" font-weight="700">SAFETY, MODERATION &amp; ADMINISTRATION</text>
+
+  <rect x="270" y="570" width="370" height="32" rx="16" fill="#ffffff" stroke="#f43f5e" stroke-width="1.2"/>
+  <text x="455" y="591" fill="#0f172a" font-size="12" font-weight="600" text-anchor="middle">UC-16: Block Abusive Peer &amp; Terminate Active Contact</text>
+
+  <rect x="270" y="615" width="370" height="32" rx="16" fill="#ffffff" stroke="#f43f5e" stroke-width="1.2"/>
+  <text x="455" y="636" fill="#0f172a" font-size="12" font-weight="600" text-anchor="middle">UC-17: Submit Misuse Report to Moderators</text>
+
+  <rect x="700" y="570" width="380" height="32" rx="16" fill="#ffffff" stroke="#f43f5e" stroke-width="1.2"/>
+  <text x="890" y="591" fill="#0f172a" font-size="12" font-weight="600" text-anchor="middle">UC-18: Manage Communities &amp; Resolve Reports (Admin)</text>
+
+  <rect x="700" y="615" width="380" height="32" rx="16" fill="#ffffff" stroke="#f43f5e" stroke-width="1.2"/>
+  <text x="890" y="636" fill="#0f172a" font-size="12" font-weight="600" text-anchor="middle">UC-19: Hide Infringing Content / Restrict Accounts (Admin)</text>
+
+  <!-- Actors (Left Column) -->
+  <!-- Visitor -->
+  <g transform="translate(40, 140)">
+    <circle cx="50" cy="25" r="16" fill="#e2e8f0" stroke="#475569" stroke-width="1.5"/>
+    <path d="M 50 41 L 50 70 M 30 52 L 70 52 M 50 70 L 32 95 M 50 70 L 68 95" stroke="#475569" stroke-width="1.5"/>
+    <text x="50" y="115" fill="#0f172a" font-size="13" font-weight="700" text-anchor="middle">Visitor</text>
+  </g>
+
+  <!-- Learner (Central Actor) -->
+  <g transform="translate(40, 310)">
+    <circle cx="50" cy="25" r="16" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+    <path d="M 50 41 L 50 70 M 30 52 L 70 52 M 50 70 L 32 95 M 50 70 L 68 95" stroke="#2563eb" stroke-width="2"/>
+    <text x="50" y="115" fill="#1e3a8a" font-size="14" font-weight="700" text-anchor="middle">Learner</text>
+    <text x="50" y="130" fill="#2563eb" font-size="10" font-weight="600" text-anchor="middle">(Core User)</text>
+  </g>
+
+  <!-- Administrator -->
+  <g transform="translate(40, 560)">
+    <circle cx="50" cy="25" r="16" fill="#fee2e2" stroke="#dc2626" stroke-width="1.5"/>
+    <path d="M 50 41 L 50 70 M 30 52 L 70 52 M 50 70 L 32 95 M 50 70 L 68 95" stroke="#dc2626" stroke-width="1.5"/>
+    <text x="50" y="115" fill="#7f1d1d" font-size="13" font-weight="700" text-anchor="middle">Administrator</text>
+  </g>
+
+  <!-- Connecting Lines from Actors to Use Cases -->
+  <!-- Visitor connections -->
+  <path d="M 120 180 L 270 181" stroke="#64748b" stroke-width="1.2" marker-end="url(#uc-arrow)"/>
+  <path d="M 120 180 L 700 181" stroke="#64748b" stroke-width="1.2" marker-end="url(#uc-arrow)"/>
+
+  <!-- Learner connections -->
+  <path d="M 120 350 L 270 221" stroke="#2563eb" stroke-width="1.5" marker-end="url(#uc-arrow)"/>
+  <path d="M 120 350 L 270 351" stroke="#2563eb" stroke-width="1.5" marker-end="url(#uc-arrow)"/>
+  <path d="M 120 350 L 270 391" stroke="#2563eb" stroke-width="1.5" marker-end="url(#uc-arrow)"/>
+  <path d="M 120 350 L 270 471" stroke="#2563eb" stroke-width="1.5" marker-end="url(#uc-arrow)"/>
+  <path d="M 120 350 L 700 226" stroke="#2563eb" stroke-width="1.5" marker-end="url(#uc-arrow)"/>
+  <path d="M 120 350 L 700 351" stroke="#2563eb" stroke-width="1.5" marker-end="url(#uc-arrow)"/>
+  <path d="M 120 350 L 700 391" stroke="#2563eb" stroke-width="1.5" marker-end="url(#uc-arrow)"/>
+  <path d="M 120 350 L 270 586" stroke="#2563eb" stroke-width="1.5" marker-end="url(#uc-arrow)"/>
+
+  <!-- Admin connections -->
+  <path d="M 120 620 L 700 586" stroke="#dc2626" stroke-width="1.5" marker-end="url(#uc-arrow)"/>
+  <path d="M 120 620 L 700 631" stroke="#dc2626" stroke-width="1.5" marker-end="url(#uc-arrow)"/>
+
+  <!-- Include / Extend Annotations -->
+  <path d="M 455 407 L 700 226" fill="none" stroke="#0284c7" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#uc-arrow-dash)"/>
+  <text x="590" y="325" fill="#0369a1" font-size="10" font-weight="600" text-anchor="middle">&lt;&lt;include&gt;&gt; Channel Gate</text>
+
+  <path d="M 890 367 L 890 375" fill="none" stroke="#7e22ce" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#uc-arrow-dash)"/>
+  <text x="965" y="372" fill="#7e22ce" font-size="10" font-weight="600">&lt;&lt;include&gt;&gt; Lock Slot</text>
+</svg>

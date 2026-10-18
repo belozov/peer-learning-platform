@@ -1,0 +1,156 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 820" width="100%" height="100%" style="background:#ffffff; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <defs>
+    <marker id="cmp-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#334155" />
+    </marker>
+    <marker id="cmp-arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#16a34a" />
+    </marker>
+    <filter id="cmp-shadow" x="-3%" y="-3%" width="106%" height="106%">
+      <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#0f172a" flood-opacity="0.06"/>
+    </filter>
+  </defs>
+
+  <!-- Title Header -->
+  <rect x="0" y="0" width="1180" height="70" fill="#0f172a" />
+  <text x="30" y="38" fill="#ffffff" font-size="20" font-weight="700">Component Architecture Diagram: Modular Monolith</text>
+  <text x="30" y="58" fill="#94a3b8" font-size="13">Subsystems, Real-Time WebSocket Gateway, Domain Boundaries &amp; Data Persistence</text>
+
+  <!-- Tier 1: Client Tier -->
+  <rect x="30" y="90" width="1120" height="150" rx="10" fill="#f8fafc" stroke="#3b82f6" stroke-width="2" filter="url(#cmp-shadow)"/>
+  <rect x="30" y="90" width="1120" height="32" rx="10" fill="#3b82f6"/>
+  <text x="45" y="112" fill="#ffffff" font-size="13" font-weight="700">FRONTEND CLIENT TIER (React 18/19 + TypeScript / Vite)</text>
+
+  <rect x="50" y="135" width="165" height="85" rx="6" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
+  <text x="60" y="158" fill="#1e3a8a" font-size="12" font-weight="700">Auth &amp; Profile UI</text>
+  <text x="60" y="178" fill="#475569" font-size="11">• Login / Registration</text>
+  <text x="60" y="195" fill="#475569" font-size="11">• Topic Preferences</text>
+  <text x="60" y="212" fill="#475569" font-size="11">• Privacy Settings</text>
+
+  <rect x="230" y="135" width="190" height="85" rx="6" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
+  <text x="240" y="158" fill="#1e3a8a" font-size="12" font-weight="700">Community &amp; Channels</text>
+  <text x="240" y="178" fill="#475569" font-size="11">• Community Directory</text>
+  <text x="240" y="195" fill="#475569" font-size="11">• Membership Gating</text>
+  <text x="240" y="212" fill="#475569" font-size="11">• Discussion Posts</text>
+
+  <rect x="435" y="135" width="235" height="85" rx="6" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
+  <text x="445" y="158" fill="#1e3a8a" font-size="12" font-weight="700">Discovery &amp; Compatibility</text>
+  <text x="445" y="178" fill="#475569" font-size="11">• Compatibility Toggle vs Newest</text>
+  <text x="445" y="195" fill="#475569" font-size="11">• Score: 0..100 (1 Decimal)</text>
+  <text x="445" y="212" fill="#475569" font-size="11">• Decomposed Match Badges</text>
+
+  <rect x="685" y="135" width="225" height="85" rx="6" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
+  <text x="695" y="158" fill="#1e3a8a" font-size="12" font-weight="700">1-to-1 Session Chat</text>
+  <text x="695" y="178" fill="#475569" font-size="11">• WebSocket Sync (No Video)</text>
+  <text x="695" y="195" fill="#475569" font-size="11">• Participant Chat Room</text>
+  <text x="695" y="212" fill="#475569" font-size="11">• Archived Chat History</text>
+
+  <rect x="925" y="135" width="210" height="85" rx="6" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
+  <text x="935" y="158" fill="#1e3a8a" font-size="12" font-weight="700">HUD &amp; Post-Session</text>
+  <text x="935" y="178" fill="#475569" font-size="11">• 180m Allowance Timer</text>
+  <text x="935" y="195" fill="#475569" font-size="11">• Dual Outcome Approval</text>
+  <text x="935" y="212" fill="#475569" font-size="11">• Partner Review Form</text>
+
+  <!-- Protocol Connectors Between Tiers -->
+  <path d="M 130 240 L 130 290" stroke="#334155" stroke-width="1.5" marker-end="url(#cmp-arrow)"/>
+  <path d="M 325 240 L 325 290" stroke="#334155" stroke-width="1.5" marker-end="url(#cmp-arrow)"/>
+  <path d="M 550 240 L 550 290" stroke="#334155" stroke-width="1.5" marker-end="url(#cmp-arrow)"/>
+  <path d="M 790 240 L 790 290" stroke="#0284c7" stroke-width="2" marker-end="url(#cmp-arrow)"/>
+  <text x="795" y="265" fill="#0284c7" font-size="10" font-weight="700">WebSocket (RFC 6455)</text>
+  <text x="440" y="265" fill="#475569" font-size="10" font-weight="700">REST API (HTTPS / JSON)</text>
+
+  <!-- Tier 2: Modular Monolith Backend -->
+  <rect x="30" y="290" width="1120" height="300" rx="10" fill="#f0fdf4" stroke="#22c55e" stroke-width="2" filter="url(#cmp-shadow)"/>
+  <rect x="30" y="290" width="1120" height="32" rx="10" fill="#22c55e"/>
+  <text x="45" y="312" fill="#ffffff" font-size="13" font-weight="700">APPLICATION TIER: MODULAR MONOLITH API (Node.js / Express 5 + TypeScript)</text>
+
+  <!-- API Gateways & Middleware -->
+  <rect x="50" y="335" width="530" height="40" rx="6" fill="#ffffff" stroke="#86efac" stroke-width="1"/>
+  <text x="65" y="360" fill="#166534" font-size="12" font-weight="700">HTTP Middleware Pipeline: JWT Authentication • ReBAC Ownership Checks • Rate Limiting</text>
+
+  <rect x="600" y="335" width="535" height="40" rx="6" fill="#ffffff" stroke="#86efac" stroke-width="1"/>
+  <text x="615" y="360" fill="#166534" font-size="12" font-weight="700">WebSocket Real-Time Gateway: ws Connection Manager • 60s Grace Timer • Broadcast Engine</text>
+
+  <!-- Core Modules Grid -->
+  <rect x="50" y="390" width="260" height="85" rx="6" fill="#ffffff" stroke="#bbf7d0" stroke-width="1"/>
+  <text x="60" y="412" fill="#0f172a" font-size="12" font-weight="700">Identity &amp; Profile Module</text>
+  <text x="60" y="432" fill="#475569" font-size="11">• Password Hashing (Never returned)</text>
+  <text x="60" y="449" fill="#475569" font-size="11">• Per-Topic Level &amp; Goals</text>
+  <text x="60" y="466" fill="#475569" font-size="11">• Default-Private Partner List</text>
+
+  <rect x="325" y="390" width="260" height="85" rx="6" fill="#ffffff" stroke="#bbf7d0" stroke-width="1"/>
+  <text x="335" y="412" fill="#0f172a" font-size="12" font-weight="700">Community &amp; Gate Module</text>
+  <text x="335" y="432" fill="#475569" font-size="11">• Community &amp; Channel Catalog</text>
+  <text x="335" y="449" fill="#475569" font-size="11">• Channel Membership Gating</text>
+  <text x="335" y="466" fill="#475569" font-size="11">• Typed Discussion Posts</text>
+
+  <rect x="600" y="390" width="260" height="85" rx="6" fill="#ffffff" stroke="#bbf7d0" stroke-width="1"/>
+  <text x="610" y="412" fill="#0f172a" font-size="12" font-weight="700">Pure Compatibility Engine</text>
+  <text x="610" y="432" fill="#475569" font-size="11">• Score = 100(0.40T + 0.35G + 0.25L)</text>
+  <text x="610" y="449" fill="#475569" font-size="11">• Pre-Score Eligibility Gating</text>
+  <text x="610" y="466" fill="#475569" font-size="11">• Missing Preference Fallback</text>
+
+  <rect x="875" y="390" width="260" height="85" rx="6" fill="#ffffff" stroke="#bbf7d0" stroke-width="1"/>
+  <text x="885" y="412" fill="#0f172a" font-size="12" font-weight="700">Session Coordination Service</text>
+  <text x="885" y="432" fill="#475569" font-size="11">• Atomic Acceptance (SELECT FOR UPDATE)</text>
+  <text x="885" y="449" fill="#475569" font-size="11">• Early-Start Guard &amp; Late-Start Cap</text>
+  <text x="885" y="466" fill="#475569" font-size="11">• Terminal State: 'ended'</text>
+
+  <rect x="50" y="490" width="350" height="85" rx="6" fill="#ffffff" stroke="#bbf7d0" stroke-width="1"/>
+  <text x="60" y="512" fill="#0f172a" font-size="12" font-weight="700">Time Accounting &amp; Ledger Service</text>
+  <text x="60" y="532" fill="#475569" font-size="11">• 180-Minute Daily Study Allowance (Confirmed)</text>
+  <text x="60" y="549" fill="#475569" font-size="11">• UTC 00:00–24:00 Boundary Split</text>
+  <text x="60" y="566" fill="#475569" font-size="11">• Idempotent Transactional Finalization</text>
+
+  <rect x="415" y="490" width="355" height="85" rx="6" fill="#ffffff" stroke="#bbf7d0" stroke-width="1"/>
+  <text x="425" y="512" fill="#0f172a" font-size="12" font-weight="700">Outcomes &amp; Reputation Service</text>
+  <text x="425" y="532" fill="#475569" font-size="11">• Dual-Approval Versioned Notes (FR-12)</text>
+  <text x="425" y="549" fill="#475569" font-size="11">• 5-Minute Minimum Review Threshold (Proposed)</text>
+  <text x="425" y="566" fill="#475569" font-size="11">• Decomposed Indicators (No Opaque Karma)</text>
+
+  <rect x="785" y="490" width="350" height="85" rx="6" fill="#ffffff" stroke="#bbf7d0" stroke-width="1"/>
+  <text x="795" y="512" fill="#0f172a" font-size="12" font-weight="700">Safety &amp; Moderation Module</text>
+  <text x="795" y="532" fill="#475569" font-size="11">• Bidirectional Peer Blocking</text>
+  <text x="795" y="549" fill="#475569" font-size="11">• Active Session Termination on Block</text>
+  <text x="795" y="566" fill="#475569" font-size="11">• Abuse Reporting Queue (Admin Action)</text>
+
+  <!-- Connectors to Database -->
+  <path d="M 590 590 L 590 630" stroke="#16a34a" stroke-width="2" marker-end="url(#cmp-arrow-green)"/>
+  <text x="600" y="615" fill="#166534" font-size="10" font-weight="700">SQL / pg Connection Pool (ACID Transactions)</text>
+
+  <!-- Tier 3: Persistence Tier -->
+  <rect x="30" y="630" width="1120" height="160" rx="10" fill="#fefce8" stroke="#eab308" stroke-width="2" filter="url(#cmp-shadow)"/>
+  <rect x="30" y="630" width="1120" height="32" rx="10" fill="#eab308"/>
+  <text x="45" y="652" fill="#78350f" font-size="13" font-weight="700">PERSISTENCE TIER: RELATIONAL DATABASE (PostgreSQL 16)</text>
+
+  <!-- DB Entities Grouping -->
+  <rect x="50" y="675" width="205" height="95" rx="6" fill="#ffffff" stroke="#fef08a" stroke-width="1"/>
+  <text x="60" y="698" fill="#854d0e" font-size="12" font-weight="700">Identity &amp; Profile</text>
+  <text x="60" y="718" fill="#475569" font-size="11">• users</text>
+  <text x="60" y="735" fill="#475569" font-size="11">• learning_preferences</text>
+  <text x="60" y="752" fill="#475569" font-size="11">• availability_slots</text>
+
+  <rect x="270" y="675" width="205" height="95" rx="6" fill="#ffffff" stroke="#fef08a" stroke-width="1"/>
+  <text x="280" y="698" fill="#854d0e" font-size="12" font-weight="700">Content &amp; Listings</text>
+  <text x="280" y="718" fill="#475569" font-size="11">• communities / channels</text>
+  <text x="280" y="735" fill="#475569" font-size="11">• channel_memberships</text>
+  <text x="280" y="752" fill="#475569" font-size="11">• posts / study_listings</text>
+
+  <rect x="490" y="675" width="205" height="95" rx="6" fill="#ffffff" stroke="#fef08a" stroke-width="1"/>
+  <text x="500" y="698" fill="#854d0e" font-size="12" font-weight="700">Responses &amp; Sessions</text>
+  <text x="500" y="718" fill="#475569" font-size="11">• listing_responses</text>
+  <text x="500" y="735" fill="#475569" font-size="11">• study_sessions</text>
+  <text x="500" y="752" fill="#475569" font-size="11">• session_messages</text>
+
+  <rect x="710" y="675" width="205" height="95" rx="6" fill="#ffffff" stroke="#fef08a" stroke-width="1"/>
+  <text x="720" y="698" fill="#854d0e" font-size="12" font-weight="700">Ledgers &amp; Outcomes</text>
+  <text x="720" y="718" fill="#475569" font-size="11">• usage_ledgers (Unique)</text>
+  <text x="720" y="735" fill="#475569" font-size="11">• session_outcomes</text>
+  <text x="720" y="752" fill="#475569" font-size="11">• peer_reviews</text>
+
+  <rect x="930" y="675" width="205" height="95" rx="6" fill="#ffffff" stroke="#fef08a" stroke-width="1"/>
+  <text x="940" y="698" fill="#854d0e" font-size="12" font-weight="700">Safety &amp; Moderation</text>
+  <text x="940" y="718" fill="#475569" font-size="11">• friendships</text>
+  <text x="940" y="735" fill="#475569" font-size="11">• user_blocks</text>
+  <text x="940" y="752" fill="#475569" font-size="11">• moderation_reports</text>
+</svg>
