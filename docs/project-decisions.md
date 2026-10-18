@@ -55,7 +55,7 @@ This document records the architectural, methodological, and scoping decisions f
 ## DEC-005: Scope Exclusions (Commercial Features, Video Streaming, Cloud Files)
 - **Status**: Confirmed
 - **Context**: Features such as paid tutoring, video conferencing infrastructure, and file hosting divert engineering effort from the core research problem: compatibility-based peer discovery.
-- **Decision**: Exclude payments, tutor certification, creator tips, native video streaming, and binary document uploads. Channel posts support text and external links; sessions support text chat and external video meeting links (e.g., Google Meet).
+- **Decision**: Exclude payments, tutor certification, creator tips, native video streaming, and binary document uploads. Channel posts support text and external links; session communication is strictly in-platform text chat without external meeting or video service dependencies.
 - **Consequences**: Dramatically reduces security surface, operational costs, and third-party API dependencies.
 
 ---

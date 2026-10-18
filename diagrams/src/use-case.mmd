@@ -1,0 +1,90 @@
+graph LR
+    %% Use Case Diagram
+    %% Compatibility-Based Peer Learning Platform
+
+    subgraph Actors["Actors"]
+        V["Visitor"]
+        L["Learner"]
+        LA["Listing Author (Context)"]
+        R["Respondent (Context)"]
+        SP["Session Participant (Context)"]
+        A["Administrator"]
+    end
+
+    subgraph UC_Auth["Identity & Profile"]
+        UC01["UC-01: Register & Authenticate"]
+        UC02["UC-02: Manage Topic Preferences & Availability"]
+        UC03["UC-03: Manage Profile Privacy & History"]
+    end
+
+    subgraph UC_Community["Communities & Channels"]
+        UC04["UC-04: Browse Communities & Channels"]
+        UC05["UC-05: Join / Leave Topic Channel"]
+        UC06["UC-06: Create / Read Channel Posts"]
+    end
+
+    subgraph UC_Discovery["Study Listings & Compatibility"]
+        UC07["UC-07: Create Study Listing"]
+        UC08["UC-08: Browse & Filter Listings by Compatibility"]
+        UC09["UC-09: Inspect Match Explanation & Score"]
+        UC10["UC-10: Respond to Study Listing"]
+        UC11["UC-11: Accept Single Study Partner"]
+    end
+
+    subgraph UC_Session["Session & Accounting"]
+        UC12["UC-12: Join & Start 1-to-1 Session"]
+        UC13["UC-13: Exchange Text Chat Messages"]
+        UC14["UC-14: Track 180m Allowance & Disconnect Grace"]
+        UC15["UC-15: Confirm Mutual Session Outcomes"]
+        UC16["UC-16: Submit Partner Review (>= 5 min)"]
+    end
+
+    subgraph UC_Admin["Administration & Safety"]
+        UC17["UC-17: Block User & Report Misuse"]
+        UC18["UC-18: Manage Communities"]
+        UC19["UC-19: Moderate Content & Resolve Reports"]
+    end
+
+    %% Actor Connections
+    V --> UC01
+    V --> UC04
+
+    L --> UC01
+    L --> UC02
+    L --> UC03
+    L --> UC04
+    L --> UC05
+    L --> UC06
+    L --> UC08
+    L --> UC09
+    L --> UC17
+
+    L -.-> LA
+    L -.-> R
+    L -.-> SP
+
+    LA --> UC07
+    LA --> UC11
+
+    R --> UC10
+
+    SP --> UC12
+    SP --> UC13
+    SP --> UC14
+    SP --> UC15
+    SP --> UC16
+
+    A --> UC18
+    A --> UC19
+
+    %% Includes & Extends
+    UC08 -.->|"<<include>> Check Membership"| UC05
+    UC11 -.->|"<<include>> Initialize Session & Lock"| UC12
+    UC16 -.->|"<<extend>> if duration >= 5m"| UC15
+
+    style Actors fill:#f1f5f9,stroke:#64748b,stroke-width:1px;
+    style UC_Auth fill:#eff6ff,stroke:#3b82f6,stroke-width:1px;
+    style UC_Community fill:#f0fdf4,stroke:#22c55e,stroke-width:1px;
+    style UC_Discovery fill:#fefce8,stroke:#eab308,stroke-width:1px;
+    style UC_Session fill:#faf5ff,stroke:#a855f7,stroke-width:1px;
+    style UC_Admin fill:#fff1f2,stroke:#f43f5e,stroke-width:1px;

@@ -62,7 +62,7 @@ The project explicitly delineates two distinct delivery phases:
   - Post-session mutual outcome confirmation and single-review submission.
 - **Confirmed Exclusions**:
   - Commercial/monetized features: Paid teacher verification, paid tutoring services, creator rewards, and payment gateways.
-  - Heavy media infrastructure: Built-in voice/video calling (external meeting links are utilized).
+  - Heavy media infrastructure: Excludes voice and video calling; sessions focus strictly on synchronous in-platform text chat.
   - File/cloud storage: Channel posts support text and external links; no binary document hosting.
   - Black-box psychometrics: No opaque machine learning or personality-based matchmaking.
   - Architecture: Modular monolith deployment; no microservices infrastructure.

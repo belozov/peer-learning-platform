@@ -60,7 +60,7 @@ flowchart TD
    - File uploads, binary cloud storage, and nested multi-tier comment threads are deferred to prevent content hosting overhead.
 3. **Communication Medium**:
    - In-platform session communication is restricted to real-time text chat with server timestamps.
-   - Heavy voice and video streaming are excluded; participants may optionally share external meeting links (e.g., Google Meet, Zoom) within the active session chat.
+   - Voice and video streaming are excluded from system architecture and dependencies; sessions are conducted entirely via synchronous in-platform text chat.
 4. **Structured Learner Profiles & Matching**:
    - Profiles capture explicit structured fields: topic tags, normalized goal categories, topic-specific knowledge level descriptors, spoken languages, and timezone/availability slots.
    - Black-box psychometrics, unsupervised clustering, or inferred personality matchmaking are strictly excluded.

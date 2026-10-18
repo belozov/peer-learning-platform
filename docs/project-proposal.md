@@ -72,7 +72,7 @@ Design, build, and evaluate a web-based peer learning platform that enables lear
 To maintain engineering feasibility within the diploma timeframe, the scope is deliberately bounded:
 - **One-to-One Focus**: One study listing leads to at most one scheduled 1-to-1 session. Group study sessions and complex recurring calendar series are deferred.
 - **Accounted Participation vs. Mastery**: The system records **accounted active participation time**; it explicitly does **not** claim to measure or guarantee verified mental attention, comprehension, or subject mastery.
-- **Text-Centric Collaboration**: Real-time communication within sessions is restricted to structured text chat; heavy media streaming (WebRTC video/voice) is excluded in favor of external meeting links if voice is desired by participants.
+- **Text-Centric Collaboration**: Real-time communication within sessions is restricted to structured text chat; voice and video streaming are formally excluded from system scope and architecture.
 - **Deterministic vs. Black-Box Matching**: Compatibility is computed via transparent, auditable heuristics ($T$, $G$, $L$) with full human explanation; opaque machine learning, embeddings, or inferred personality profiles are strictly excluded.
 
 ### 7.2 Explicit Exclusions

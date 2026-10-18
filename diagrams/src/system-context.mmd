@@ -1,0 +1,45 @@
+graph TD
+    %% System Context Diagram
+    %% Compatibility-Based Peer Learning Platform
+
+    subgraph Actors["Platform Actors"]
+        Visitor["Visitor<br/>(Unauthenticated Guest)"]
+        Learner["Learner<br/>(Authenticated Student / Self-Learner)"]
+        Admin["Administrator<br/>(Platform Moderator)"]
+    end
+
+    subgraph SystemBoundary["System Context Boundary: Peer Learning Platform"]
+        Platform["Compatibility-Based Peer Learning Platform<br/>(Modular Monolith: React + Express + PostgreSQL)<br/><br/>- Topic-specific communities & channels<br/>- Deterministic compatibility ranking (T, G, L)<br/>- 1-to-1 session text chat & 60s presence grace<br/>- Server-authoritative time accounting (180m cap)"]
+    end
+
+    subgraph ContextualRoles["Contextual Learner Roles (Assumed by Learner)"]
+        AuthorRole["Listing Author<br/>(Creates listing, reviews matches, accepts partner)"]
+        RespondentRole["Respondent<br/>(Applies to open listings, withdraws responses)"]
+        ParticipantRole["Session Participant<br/>(Active text chat, mutual outcome approval, review)"]
+    end
+
+    %% Interactions
+    Visitor -->|"Browse public overview, register, sign in"| Platform
+    Learner -->|"Manage preferences, join channels, view history"| Platform
+    Learner -.->|"Assumes context"| AuthorRole
+    Learner -.->|"Assumes context"| RespondentRole
+    Learner -.->|"Assumes context"| ParticipantRole
+
+    AuthorRole -->|"Create listing, review applicants, accept 1 partner"| Platform
+    RespondentRole -->|"Discover ranked listings, submit response"| Platform
+    ParticipantRole -->|"Exchange session chat, verify topics, submit review"| Platform
+
+    Admin -->|"Create communities, hide reported content, resolve abuse"| Platform
+
+    %% Architectural Boundaries
+    subgraph ExcludedScope["Formally Excluded Dependencies"]
+        NoVideo["Third-Party Video Streaming / WebRTC<br/>(Excluded: Text chat only)"]
+        NoPayments["Payment Gateways / Monetization<br/>(Excluded: Free academic exchange)"]
+        NoML["Black-Box ML / Personality Matching<br/>(Excluded: Transparent heuristics)"]
+    end
+
+    style SystemBoundary fill:#f8fafc,stroke:#3b82f6,stroke-width:2px;
+    style Platform fill:#eff6ff,stroke:#2563eb,stroke-width:2px;
+    style Actors fill:#f1f5f9,stroke:#64748b,stroke-width:1px;
+    style ContextualRoles fill:#fdf4ff,stroke:#c026d3,stroke-width:1px;
+    style ExcludedScope fill:#fff1f2,stroke:#e11d48,stroke-width:1px,stroke-dasharray: 5 5;

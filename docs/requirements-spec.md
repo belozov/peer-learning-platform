@@ -137,7 +137,7 @@ To align with the milestone delivery boundaries, every requirement defines two d
   - Messages persist in `session_messages` with server timestamps; external observers cannot connect to the socket room.
 
 ### FR-11: Daily Study Allowance Accounting
-- **Classification**: Confirmed / P0 *(180 min allowance, UTC boundary: Proposed)*
+- **Classification**: Confirmed / P0 *(180 min allowance: Confirmed; UTC boundary: Proposed)*
 - **Summary**: Each free learner has a daily study allowance of 180 minutes. Active session time decrements the remaining allowance in real time.
 - **Immediate Prototype Acceptance Criteria**:
   - Header displays "Remaining Daily Allowance: 180 min".

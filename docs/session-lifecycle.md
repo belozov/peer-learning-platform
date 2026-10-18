@@ -52,7 +52,7 @@ Where:
 
 ## 3. Daily Allowance & Day Boundary Rules
 
-### 3.1 180-Minute Daily Study Allowance (Proposed Design Rule)
+### 3.1 180-Minute Daily Study Allowance (Confirmed)
 - Each free learner account is allocated $180\text{ minutes}$ of total accounted study time per calendar day.
 - Allowance is shared across all study sessions attended on that calendar date.
 - Once a learner's remaining allowance reaches $0$, active sessions immediately transition to `ended` with reason `allowance_exhaustion`, and new messages are rejected.
