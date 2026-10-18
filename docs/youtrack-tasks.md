@@ -3,7 +3,7 @@
 ## 1. Project Management Overview
 - **Project Tracking Tool**: YouTrack *(Instance link pending provisioning)*
 - **YouTrack URL**: `[PENDING: YouTrack Project URL]`
-- **Remote Git Repository**: `[PENDING: Git Remote Repository URL]`
+- **Remote Git Repository**: [https://github.com/belozov/peer-learning-platform](https://github.com/belozov/peer-learning-platform)
 - **Task Identifier Convention**: Provisional local task IDs (`PLP-xx`) are used until official YouTrack project keys are generated. All Git branches and commit messages follow the format: `PLP-xx-brief-description`.
 - **Assignee / Owner**: Жумиров Бекзат Ерболатулы (Individual Diploma Project)
 

@@ -95,7 +95,7 @@ The project explicitly delineates two distinct delivery phases:
 ## 6. Project Management and Tracking
 
 - **Version Control**: Git repository tracking incremental progress through task-based branches (`PLP-xx-feature-name`).
-- **Remote Repository**: `[PENDING: Git Remote Repository URL]` *(Local repository active)*.
+- **Remote Repository**: [https://github.com/belozov/peer-learning-platform](https://github.com/belozov/peer-learning-platform)
 - **Task Management (YouTrack)**: `[PENDING: YouTrack Project URL]` *(Provisional task backlog maintained in `docs/youtrack-tasks.md`)*.
 
 ---
