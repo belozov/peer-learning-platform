@@ -22,10 +22,10 @@
 ### Batch 2: Detailed Requirements Specification
 | Task ID | Task Title | Priority | Deadline | Status | Expected Outcome & Acceptance Criteria | Artifact / Ref |
 | :--- | :--- | :-: | :-: | :-: | :--- | :--- |
-| **PLP-05** | Functional Requirements Catalog (FR-01..19) | P0 | 2026-10-19 | In Progress | Full specification of FR-01 through FR-19 with unambiguous, testable acceptance criteria; edge cases specified. | `docs/requirements-spec.md` |
-| **PLP-06** | Non-Functional Requirements & Security Matrix | P0 | 2026-10-19 | In Progress | NFR-01 to NFR-07 documented (authorization, concurrency, responsive UI, accessibility, performance target). | `docs/requirements-spec.md` |
-| **PLP-07** | Field-Level Access Control Matrix | P0 | 2026-10-19 | Pending | Explicit matrix defining visibility rules for visitor, authenticated learner, friend, and administrator roles. | `docs/access-matrix.md` |
-| **PLP-08** | Session Lifecycle State Machine & Accounting Rules | P0 | 2026-10-19 | Pending | Formal state transition diagram and rules (`scheduled → active → ended / cancelled / no_show`) and UTC reset logic. | `docs/session-lifecycle.md` |
+| **PLP-05** | Functional Requirements Catalog (FR-01..19) | P0 | 2026-10-19 | **Completed** | Full specification of FR-01 through FR-19 with unambiguous, testable acceptance criteria; prototype vs V1 boundaries. | `docs/requirements-spec.md` |
+| **PLP-06** | Non-Functional Requirements & Security Matrix | P0 | 2026-10-19 | **Completed** | NFR-01 to NFR-07 documented with observable pass/fail checks (auth, concurrency, responsive UI, accessibility, performance). | `docs/requirements-spec.md` |
+| **PLP-07** | Field-Level Access Control Matrix | P0 | 2026-10-19 | **Completed** | RBAC/ReBAC matrix; friend relationship vs roles; field-by-field permissions on profiles, chat, history, moderation. | `docs/access-matrix.md` |
+| **PLP-08** | Session Lifecycle State Machine & Accounting Rules | P0 | 2026-10-19 | **Completed** | State transitions (`scheduled → active → ended/cancelled/no_show`), UTC reset, 60s grace, 180m cap, idempotent finalization. | `docs/session-lifecycle.md`, `docs/compatibility-rules.md` |
 
 ### Batch 3: Architectural Design & Technology Evaluation
 | Task ID | Task Title | Priority | Deadline | Status | Expected Outcome & Acceptance Criteria | Artifact / Ref |

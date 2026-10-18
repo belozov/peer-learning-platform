@@ -74,11 +74,11 @@ The project explicitly delineates two distinct delivery phases:
 | Deliverable Area | Current Status | Notes / Evidence |
 | :--- | :--- | :--- |
 | **Project Proposal & Scope** | **Drafted** | Complete baseline in `docs/project-proposal.md` & `docs/project-scope.md`. |
-| **Requirements Specification** | **In Progress (Batch 2)** | Functional and non-functional specifications structured. |
+| **Requirements Specification** | **Drafted (Batch 2)** | FR-01..19, NFR-01..07, access matrix, session lifecycle, and compatibility rules specified. |
 | **Architectural Diagrams** | **In Progress (Batch 3)** | System Context, Use Case, and Component designs in preparation. |
 | **Interactive Prototype** | **Scheduled (Batch 4)** | Demonstration scenario with explicit mocked banners. |
 | **User Relevance Evidence** | **Pending Fieldwork** | Protocol and anonymized template ready in `docs/user-research.md`; 3–5 interviews pending. |
-| **Literature Review** | **Early Collection Active** | Seed sources recorded; 12+ critical synthesis matrix in progress. |
+| **Literature Review** | **Early Collection Active** | 10 seed sources recorded; full 12+ critical synthesis matrix scheduled for Batch 5. |
 | **Supervisor Review** | **Pending** | Scheduled submission for review on or before 20 October 2026. |
 
 ---
@@ -106,6 +106,10 @@ All primary project artifacts are maintained in the [`docs/`](file:///c:/Users/Q
 
 - [Project Proposal](file:///c:/Users/QWERTY/Documents/Development%20of%20a%20compatibility-based%20peer%20learning%20platform/docs/project-proposal.md): Complete academic proposal, aim, objectives, and problem background.
 - [Project Scope & Boundaries](file:///c:/Users/QWERTY/Documents/Development%20of%20a%20compatibility-based%20peer%20learning%20platform/docs/project-scope.md): Detailed functional boundaries, limits, and milestone definitions.
+- [Requirements Specification](file:///c:/Users/QWERTY/Documents/Development%20of%20a%20compatibility-based%20peer%20learning%20platform/docs/requirements-spec.md): Complete functional (FR-01..19) and non-functional (NFR-01..07) catalog with two-tier acceptance criteria.
+- [Access Control Matrix](file:///c:/Users/QWERTY/Documents/Development%20of%20a%20compatibility-based%20peer%20learning%20platform/docs/access-matrix.md): RBAC and ReBAC permissions matrix, friend relationship definitions, and field privacy.
+- [Session Lifecycle & Accounting](file:///c:/Users/QWERTY/Documents/Development%20of%20a%20compatibility-based%20peer%20learning%20platform/docs/session-lifecycle.md): State machine, wall-clock timekeeping, 60s grace period, 180m daily allowance, and UTC day boundaries.
+- [Compatibility Rules & Scoring](file:///c:/Users/QWERTY/Documents/Development%20of%20a%20compatibility-based%20peer%20learning%20platform/docs/compatibility-rules.md): Deterministic compatibility formula ($T, G, L$), hard eligibility filters, edge cases, and human-readable explanations.
 - [Submission Checklist & Compliance Register](file:///c:/Users/QWERTY/Documents/Development%20of%20a%20compatibility-based%20peer%20learning%20platform/docs/submission-checklist.md): University evaluation criteria and artifact audit status.
 - [Architectural Decision Records (ADR)](file:///c:/Users/QWERTY/Documents/Development%20of%20a%20compatibility-based%20peer%20learning%20platform/docs/project-decisions.md): Rationales for technology and algorithmic selections.
 - [YouTrack Task Backlog](file:///c:/Users/QWERTY/Documents/Development%20of%20a%20compatibility-based%20peer%20learning%20platform/docs/youtrack-tasks.md): Traceable task definitions with acceptance criteria.
