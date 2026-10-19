@@ -106,8 +106,8 @@ The project explicitly delineates two distinct delivery phases:
 
 - **Version Control**: Git repository tracking incremental progress through task-based branches (`PLP-xx-feature-name`).
 - **Remote Repository**: [https://github.com/belozov/peer-learning-platform](https://github.com/belozov/peer-learning-platform) (verified reachable via `git fetch`).
-- **Task Management (YouTrack)**: [https://bekzat-diploma-2027.youtrack.cloud](https://bekzat-diploma-2027.youtrack.cloud)  
-  *(Provisional local task IDs `PLP-xx` are used locally in `docs/youtrack-tasks.md`; cloud issue synchronization is pending project key mapping)*.
+- **Task Management (YouTrack)**: [https://bekzat-diploma-2027.youtrack.cloud/projects/PLP](https://bekzat-diploma-2027.youtrack.cloud/projects/PLP)  
+  *(Project Key: `PLP`, Project ID: `0-1`. All 22 milestone tasks `PLP-1` through `PLP-22` are synchronized and tracked on YouTrack Cloud; see [`docs/youtrack-tasks.md`](docs/youtrack-tasks.md))*.
 
 ---
 

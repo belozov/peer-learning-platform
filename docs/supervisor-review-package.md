@@ -8,7 +8,7 @@
 **Submission Target Date:** 20 October 2026 (Working Operational Checkpoint)  
 **Repository Milestone:** 24 October 2026  
 **Git Remote:** [https://github.com/belozov/peer-learning-platform](https://github.com/belozov/peer-learning-platform)  
-**YouTrack Instance:** [https://bekzat-diploma-2027.youtrack.cloud](https://bekzat-diploma-2027.youtrack.cloud)  
+**YouTrack Project:** [https://bekzat-diploma-2027.youtrack.cloud/projects/PLP](https://bekzat-diploma-2027.youtrack.cloud/projects/PLP) (Project Key: `PLP`)  
 
 ---
 
@@ -43,7 +43,7 @@ To uphold academic integrity and truth-in-reporting standards:
 | **7** | **Architecture & Diagrams** | [`docs/architecture.md`](architecture.md), [`diagrams/`](../diagrams/) | System Context, Use Case (UML semantics), and Component (Proposed V1 label) diagrams with editable `.mmd` sources and regenerated `.svg` exports. | **Completed (Draft Exports)** |
 | **8** | **Interactive Prototype** | [`prototype/`](../prototype/) | Runnable web prototype; in-memory channel gating, score format `Score: 80.0 / 100`, deterministic reconciler, outsider access controls; 13/13 tests pass. | **Delivered (Simulation Prototype)** |
 | **9** | **Evaluation Plan** | [`docs/evaluation-plan.md`](evaluation-plan.md) | Formal within-subjects counterbalanced protocol comparing Chronological vs. Compatibility ordering across identical candidates (RQ1–RQ3). | **Completed (Protocol)** |
-| **10**| **Project Management & Risks** | [`docs/youtrack-tasks.md`](youtrack-tasks.md), [`README.md`](../README.md) | WBS with 22 traceable tasks, dependencies, 4-item risk register, reachable remote Git repo, and YouTrack cloud instance. | **In Progress (Instance active)** |
+| **10**| **Project Management & Risks** | [`docs/youtrack-tasks.md`](youtrack-tasks.md), [`README.md`](../README.md) | WBS with 22 traceable tasks, dependencies, 4-item risk register, synchronized remote Git repo, and YouTrack cloud project (`PLP-1`..`PLP-22`). | **Completed (Synchronized)** |
 | **11**| **Supervisor Feedback** | [`docs/supervisor-log.md`](supervisor-log.md) | Action item tracking log prepared to record genuine feedback from Aigerim Kydyrbekova. | **Pending Supervisor Review** |
 
 ---

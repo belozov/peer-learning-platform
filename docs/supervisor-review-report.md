@@ -217,7 +217,7 @@ The evaluation plan (`docs/evaluation-plan.md`) establishes a formal research pr
 | 7 | Architecture & Diagrams | `docs/architecture.md`, `diagrams/` | **Completed (Draft Exports)** |
 | 8 | UX / Prototype | `prototype/` | **Delivered (Simulation Prototype)** |
 | 9 | Verification & Evaluation Plan | `docs/evaluation-plan.md` | **Completed (Protocol)** |
-| 10 | Project Management & Risks | `docs/youtrack-tasks.md`, `README.md` | **In Progress (Instance active)** |
+| 10 | Project Management & Risks | `docs/youtrack-tasks.md`, `README.md` | **Completed (Synchronized)** |
 | 11 | Supervisor Feedback | `docs/supervisor-log.md` | **Pending Supervisor Review** |
 
 ### 8.2 Open Architectural Decisions Awaiting Supervisor Guidance
@@ -242,8 +242,9 @@ npm test
 ```
 Access in browser: `http://localhost:3000`
 
-### 9.2 Remote Git & Review Archive
-- **Remote Branch**: `PLP-16-research-literature-and-evaluation` on `https://github.com/belozov/peer-learning-platform`.
-- **Verified Commit**: `24b1ceb1915bc6a627f4454a2488836dfda2f99c`.
+### 9.2 Project Tracking, Remote Git & Review Archive
+- **YouTrack Cloud Project**: [https://bekzat-diploma-2027.youtrack.cloud/projects/PLP](https://bekzat-diploma-2027.youtrack.cloud/projects/PLP) (Project Key: `PLP`, 22 milestone tasks `PLP-1`..`PLP-22` synchronized).
+- **Remote Git Branch**: `PLP-16-research-literature-and-evaluation` on `https://github.com/belozov/peer-learning-platform`.
+- **Verified Remote Commit**: `334f1c8f0369985a3a1f1d143ce3c28aa5f5885a`.
 - **Pull Request Creation URL**: [https://github.com/belozov/peer-learning-platform/pull/new/PLP-16-research-literature-and-evaluation](https://github.com/belozov/peer-learning-platform/pull/new/PLP-16-research-literature-and-evaluation)
-- **Review ZIP Archive**: `C:\Users\QWERTY\Documents\peer-learning-platform-batch-5-review.zip` (564,388 bytes, 36 files).
+- **Review ZIP Archive**: `C:\Users\QWERTY\Documents\peer-learning-platform-batch-6-review.zip` (779,039 bytes, self-contained without `.git/` or `node_modules/`).

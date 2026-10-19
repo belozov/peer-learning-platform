@@ -23,6 +23,8 @@ out/
 *.pem
 *.key
 *.cert
+*token*.txt
+*credentials*.txt
 secrets/
 
 # IDE and Editor configurations
