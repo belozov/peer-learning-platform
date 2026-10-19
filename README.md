@@ -1,6 +1,6 @@
 # Development of a Compatibility-Based Peer Learning Platform
 
-[![Status: Analysis & Design in Progress](https://img.shields.io/badge/Status-Analysis%20%26%20Design%20in%20Progress-blue.svg)](#4-current-development-status)
+[![Status: Research & Prototype Delivered](https://img.shields.io/badge/Status-Research%20%26%20Prototype%20Delivered-blue.svg)](#4-current-development-status)
 [![Diploma Project](https://img.shields.io/badge/Diploma%20Project-SE--2416-green.svg)](#2-team-and-supervision)
 
 > A web platform that helps self-directed learners discover, evaluate, and connect with compatible one-to-one study partners within focused topic communities using explainable, multi-attribute matching.
@@ -47,7 +47,7 @@ The project explicitly delineates two distinct delivery phases:
 1. **Immediate University Milestone (Target: 20–24 October 2026)**:
    - Working supervisor-review target: **20 October 2026**.
    - Stated repository milestone: **24 October 2026** *(Formal designation as "Pre-defense 1" pending institutional confirmation; deadline discrepancy unresolved)*.
-   - Deliverables: Comprehensive domain analysis, functional/non-functional requirements, architectural diagrams (source and exports), research and interview protocols, technology comparisons, and an interactive prototype featuring explicit simulation banners.
+   - Deliverables: Comprehensive domain analysis, functional/non-functional requirements, architectural diagrams (source and exports), research and interview protocols, technology comparisons, 14-source literature review, 5-system comparative matrix, evaluation plan, and an interactive demonstration prototype featuring honest coverage labels.
 2. **Later Working V1 (Implementation Phase)**:
    - Persistent relational data storage in PostgreSQL, working authentication, real-time WebSocket messaging, server-side usage ledger tracking, and privacy control enforcement.
 
@@ -75,29 +75,39 @@ The project explicitly delineates two distinct delivery phases:
 | :--- | :--- | :--- |
 | **Project Proposal & Scope** | **Drafted** | Complete baseline in `docs/project-proposal.md` & `docs/project-scope.md`. |
 | **Requirements Specification** | **Drafted (Revised)** | FR-01..19, NFR-01..07, access matrix, session lifecycle, and compatibility rules specified. |
-| **Review Resolution Report** | **Drafted** | Comprehensive audit addressing Astra review findings B1–B10 in `docs/review-resolution.md`. |
-| **Architectural Diagrams** | **In Progress (Batch 3)** | System Context, Use Case, and Component designs in `diagrams/src/` and `diagrams/exports/`. |
-| **Interactive Prototype** | **Scheduled (Batch 4)** | Demonstration scenario with explicit simulation banners. |
-| **User Relevance Evidence** | **Pending Fieldwork** | Protocol and anonymized template ready in `docs/user-research.md`; 3–5 adult interviews pending. |
-| **Literature Review** | **Early Collection Active** | 7 verified scholarly sources recorded in `docs/user-research.md`; full 12+ matrix scheduled for Batch 5. |
-| **Supervisor Review** | **Scheduled** | Working target submission for review on 20 October 2026. |
+| **Review Resolution Report** | **Drafted (Revised)** | Itemized resolution of Astra reviews 1, 2, and 3 in `docs/review-resolution.md`. |
+| **Architectural Diagrams** | **Completed (Draft exports)** | System Context, Use Case, and Component designs in `diagrams/src/` and `diagrams/exports/`. |
+| **Interactive Prototype** | **Delivered (Simulation)** | Complete client-side prototype in `prototype/`; 13/13 automated test suites pass on `app.js`. |
+| **Literature Review** | **Completed (14 sources)** | 14 verified scholarly works (11 peer-reviewed journal articles, 7 recent 2021–2024) in `docs/literature-review.md`. |
+| **Existing Systems Comparison** | **Completed** | 5 systems compared across 10 uniform criteria (C1–C10) with access dates in `docs/existing-systems.md`. |
+| **Technology Comparison** | **Completed (Revised)** | 4 decisions compared with official citations and prototype/V1 separation in `docs/technology-comparison.md`. |
+| **Evaluation Plan** | **Completed (Protocol)** | RQ1–RQ3 protocol, counterbalanced design, identical filters, adult safeguards in `docs/evaluation-plan.md`. |
+| **User Relevance Fieldwork** | **Pending Adult Fieldwork** | Protocol and anonymized template ready in `docs/user-research.md`; 3–5 adult interviews pending. |
+| **Supervisor Review** | **Scheduled (20 Oct Target)**| Comprehensive review package prepared for submission to Aigerim Kydyrbekova. |
 
 ---
 
-## 5. Technology Stack Selection (Proposed)
+## 5. Technology Stack Selection
 
-- **Frontend**: React 18/19 + TypeScript (Vite) — provides strong type-safety, component modularity, and predictable UI state handling for complex discovery filters.
-- **Backend**: Node.js + Express 5 (TypeScript) — lightweight modular monolithic architecture sharing TypeScript types with the client.
-- **Database**: PostgreSQL 16 — relational consistency, foreign key constraints, GIN index support, and row-level locking for concurrent acceptance.
-- **Real-Time Communication**: WebSocket (`ws` / RFC 6455) — low-latency bidirectional session state and chat message synchronization with 60s disconnection grace timer.
+### 5.1 Milestone Demonstration Prototype (Batch 4 — Delivered)
+- **Runtime**: Plain HTML5, CSS3, and standard client-side JavaScript (ECMAScript 2020+ universal UMD module).
+- **Execution**: Zero build-step static web execution; runs directly in modern browsers and headless Node.js test environments.
+- **State & Clock**: In-memory state store with deterministic demo clock and reconciler for canonical fixtures (A-01..A-04, A-06, S-01, M-01).
+
+### 5.2 Proposed Working-V1 Production Architecture (Planned)
+- **Frontend**: React 18/19 + TypeScript (Vite) — component-driven state handling, TSX type validation with backend DTOs.
+- **Backend**: Node.js + Express 5 (TypeScript) — modular monolithic architecture supporting the Shared Lock Protocol (`SELECT FOR UPDATE`).
+- **Database**: PostgreSQL 16 — relational consistency, check constraints, GIN array indexing, and row-level locking for concurrent acceptance.
+- **Real-Time Communication**: WebSocket (`ws` / RFC 6455) — full-duplex session chat with immediate connection-state lifecycle detection and 60s grace buffer.
 
 ---
 
 ## 6. Project Management and Tracking
 
 - **Version Control**: Git repository tracking incremental progress through task-based branches (`PLP-xx-feature-name`).
-- **Remote Repository**: [https://github.com/belozov/peer-learning-platform](https://github.com/belozov/peer-learning-platform)
-- **Task Management (YouTrack)**: `[PENDING: YouTrack Project URL]` *(Provisional local task backlog maintained in `docs/youtrack-tasks.md`)*.
+- **Remote Repository**: [https://github.com/belozov/peer-learning-platform](https://github.com/belozov/peer-learning-platform) (verified reachable via `git fetch`).
+- **Task Management (YouTrack)**: [https://bekzat-diploma-2027.youtrack.cloud](https://bekzat-diploma-2027.youtrack.cloud)  
+  *(Provisional local task IDs `PLP-xx` are used locally in `docs/youtrack-tasks.md`; cloud issue synchronization is pending project key mapping)*.
 
 ---
 
@@ -111,27 +121,39 @@ All primary project artifacts are maintained in the [`docs/`](docs/) directory u
 - [Access Control Matrix](docs/access-matrix.md): RBAC and ReBAC permissions matrix, friend relationship definitions, and password hash privacy.
 - [Session Lifecycle & Accounting](docs/session-lifecycle.md): State machine, wall-clock timekeeping, 60s grace period, 180m daily allowance, and UTC day boundaries.
 - [Compatibility Rules & Scoring](docs/compatibility-rules.md): Deterministic compatibility formula ($T, G, L$), hard eligibility filters, edge cases, and human-readable explanations.
-- [Review Resolution Report](docs/review-resolution.md): Itemized resolution of Astra review findings (B1–B10 and improvements).
+- [Review Resolution Report](docs/review-resolution.md): Itemized resolution of Astra reviews 1, 2, and 3.
 - [Architecture & System Design](docs/architecture.md): Modular monolith subsystem breakdown and concurrency boundaries.
 - [Relational Data Model](docs/data-model.md): Comprehensive schema specification derived from requirements.
-- [Technology Comparison](docs/technology-comparison.md): Comparative analysis of 4 technical decisions with official documentation citations.
+- [Literature Review & Critical Synthesis](docs/literature-review.md): 14 verified scholarly works, analysis matrix, and engineering synthesis.
+- [Existing Systems Comparison](docs/existing-systems.md): Matrix comparing 5 platforms across 10 uniform criteria with access dates.
+- [Technology Comparison](docs/technology-comparison.md): Comparative analysis of 4 technical decisions with prototype/V1 separation.
+- [Empirical Evaluation Protocol](docs/evaluation-plan.md): RQ1–RQ3 protocol, counterbalanced design, and adult ethical safeguards.
 - [Submission Checklist & Compliance Register](docs/submission-checklist.md): University evaluation criteria and artifact audit status.
 - [Architectural Decision Records (ADR)](docs/project-decisions.md): Rationales for technology and algorithmic selections.
 - [YouTrack Task Backlog](docs/youtrack-tasks.md): Traceable task definitions with dependencies, risks, and supervisor checkpoints.
-- [User Research & Literature Collection](docs/user-research.md): Semi-structured interview protocol, recording template, and audited academic bibliography.
+- [User Research Protocol](docs/user-research.md): Semi-structured interview protocol and adult consent template.
 
 ---
 
 ## 8. Setup and Verification Instructions
 
-*(Runnable code instructions will expand as implementation progresses. Initial workspace verification commands below)*:
-
+### 8.1 Repository Root Execution
 ```bash
-# Verify Git status
-git status
+# Start local static web server from root
+python -m http.server 3000 --directory prototype
 
-# Inspect documentation structure
-ls -la docs/
-ls -la diagrams/
-ls -la prototype/
+# Run automated verification suite against app.js controller
+node prototype/test-prototype.js
+```
+Open `http://localhost:3000` in any modern web browser.
+
+### 8.2 Prototype Directory Execution
+```bash
+cd prototype
+
+# Start local server from inside prototype/
+python -m http.server 3000 --directory .
+
+# Run automated tests via npm
+npm test
 ```
