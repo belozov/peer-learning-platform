@@ -8,6 +8,7 @@
 **Submission Target Date:** 20 October 2026 (Working Operational Checkpoint)  
 **Repository Milestone:** 24 October 2026  
 **Git Remote:** [https://github.com/belozov/peer-learning-platform](https://github.com/belozov/peer-learning-platform)  
+**GitHub Pull Request:** [https://github.com/belozov/peer-learning-platform/pull/2](https://github.com/belozov/peer-learning-platform/pull/2) (PR #2)  
 **YouTrack Project:** [https://bekzat-diploma-2027.youtrack.cloud/projects/PLP](https://bekzat-diploma-2027.youtrack.cloud/projects/PLP) (Project Key: `PLP`)  
 
 ---

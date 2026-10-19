@@ -86,10 +86,19 @@ def main():
         if issues_res.status_code == 200:
             for iss in issues_res.json():
                 summary = iss.get('summary', '')
+                id_readable = iss.get('idReadable', '')
                 existing_issues_map[summary] = iss
-                m = re.match(r'^(PLP-\d+)', summary)
-                if m:
-                    existing_issues_map[m.group(1)] = iss
+                existing_issues_map[id_readable] = iss
+                m_id = re.match(r'^PLP-(\d+)', id_readable)
+                if m_id:
+                    num = int(m_id.group(1))
+                    existing_issues_map[f"PLP-{num}"] = iss
+                    existing_issues_map[f"PLP-{num:02d}"] = iss
+                m_sum = re.match(r'^PLP-(\d+)', summary)
+                if m_sum:
+                    num = int(m_sum.group(1))
+                    existing_issues_map[f"PLP-{num}"] = iss
+                    existing_issues_map[f"PLP-{num:02d}"] = iss
             print(f"Found {len(issues_res.json())} existing issues in project '{PROJECT_KEY}'")
         else:
             print(f"WARNING: Could not query existing issues (HTTP {issues_res.status_code})")
@@ -102,8 +111,8 @@ def main():
         tasks_content = f.read()
 
     task_rows = []
-    # Match markdown table rows: | **PLP-xx** | Task Title | Priority | Deadline | Dependencies | Status | Expected Outcome | Artifact / Ref |
-    pattern = r'\|\s*\*\*(PLP-\d+)\*\*\s*\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|'
+    # Match markdown table rows: | [**PLP-x**](link) | Task Title | Priority | Deadline | Dependencies | Status | Expected Outcome | Artifact / Ref |
+    pattern = r'\|\s*(?:\[)?\*\*(PLP-\d+)\*\*(?:\]\([^)]+\))?\s*\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|'
     for match in re.finditer(pattern, tasks_content):
         t_id, title, priority, deadline, deps, status, outcome, artifact = [m.strip() for m in match.groups()]
         task_rows.append({

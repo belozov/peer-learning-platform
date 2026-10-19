@@ -31,8 +31,7 @@ To maintain strict truth-in-reporting, the project separates its delivery roadma
 
 ### Epistemological Integrity & Pending Evidence
 - **Pending Adult Fieldwork (Component 2)**: Semi-structured interviews with 3–5 adult learners ($\ge 18$) remain pending participant scheduling. Protocols, ethics safeguards, and recording templates are fully prepared in `docs/user-research.md`. No interview data has been fabricated.
-- **Pending Supervisor Feedback (Component 11)**: Official review comments from Aigerim Kydyrbekova will be recorded verbatim in `docs/supervisor-log.md` upon review package submission.
-- **YouTrack Cloud Synchronization**: The cloud instance `https://bekzat-diploma-2027.youtrack.cloud` is active. Provisional task IDs (`PLP-01` through `PLP-22`) are maintained in `docs/youtrack-tasks.md`; cloud issue synchronization is pending project key mapping on the cloud instance.
+- **YouTrack Cloud Synchronization**: **Verified & Synchronized**. Project `PLP` ([https://bekzat-diploma-2027.youtrack.cloud/projects/PLP](https://bekzat-diploma-2027.youtrack.cloud/projects/PLP)) hosts all 22 milestone tasks (`PLP-1` through `PLP-22`) with full requirements-traceable acceptance criteria.
 
 ---
 
@@ -245,6 +244,6 @@ Access in browser: `http://localhost:3000`
 ### 9.2 Project Tracking, Remote Git & Review Archive
 - **YouTrack Cloud Project**: [https://bekzat-diploma-2027.youtrack.cloud/projects/PLP](https://bekzat-diploma-2027.youtrack.cloud/projects/PLP) (Project Key: `PLP`, 22 milestone tasks `PLP-1`..`PLP-22` synchronized).
 - **Remote Git Branch**: `PLP-16-research-literature-and-evaluation` on `https://github.com/belozov/peer-learning-platform`.
-- **Verified Remote Commit**: `334f1c8f0369985a3a1f1d143ce3c28aa5f5885a`.
-- **Pull Request Creation URL**: [https://github.com/belozov/peer-learning-platform/pull/new/PLP-16-research-literature-and-evaluation](https://github.com/belozov/peer-learning-platform/pull/new/PLP-16-research-literature-and-evaluation)
-- **Review ZIP Archive**: `C:\Users\QWERTY\Documents\peer-learning-platform-batch-6-review.zip` (779,039 bytes, self-contained without `.git/` or `node_modules/`).
+- **Verified Remote Commit**: `34a263df7054f9a08e1781c62d08a5c378e932b1` (on `PLP-16-research-literature-and-evaluation`).
+- **GitHub Pull Request**: [https://github.com/belozov/peer-learning-platform/pull/2](https://github.com/belozov/peer-learning-platform/pull/2) (open for supervisor review).
+- **Review ZIP Archive**: `C:\Users\QWERTY\Documents\peer-learning-platform-batch-6-review.zip` (self-contained review package without `.git/` or `node_modules/`).

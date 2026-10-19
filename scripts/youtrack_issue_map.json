@@ -1,56 +1,56 @@
 [
   {
-    "task_id": "PLP-01",
+    "task_id": "PLP-1",
     "idReadable": "PLP-1",
-    "summary": "PLP-01: Repository Initialization & Baseline Documentation",
+    "summary": "PLP-1: Repository Initialization & Baseline Documentation",
     "link": "https://bekzat-diploma-2027.youtrack.cloud/issue/PLP-1"
   },
   {
-    "task_id": "PLP-02",
+    "task_id": "PLP-2",
     "idReadable": "PLP-2",
-    "summary": "PLP-02: Project Proposal & Scope Delimitation",
+    "summary": "PLP-2: Project Proposal & Scope Delimitation",
     "link": "https://bekzat-diploma-2027.youtrack.cloud/issue/PLP-2"
   },
   {
-    "task_id": "PLP-03",
+    "task_id": "PLP-3",
     "idReadable": "PLP-3",
-    "summary": "PLP-03: University Compliance & Decision Register",
+    "summary": "PLP-3: University Compliance & Decision Register",
     "link": "https://bekzat-diploma-2027.youtrack.cloud/issue/PLP-3"
   },
   {
-    "task_id": "PLP-04",
+    "task_id": "PLP-4",
     "idReadable": "PLP-4",
-    "summary": "PLP-04: User Research Protocol & Seed Bibliography",
+    "summary": "PLP-4: User Research Protocol & Seed Bibliography",
     "link": "https://bekzat-diploma-2027.youtrack.cloud/issue/PLP-4"
   },
   {
-    "task_id": "PLP-05",
+    "task_id": "PLP-5",
     "idReadable": "PLP-5",
-    "summary": "PLP-05: Functional Requirements Catalog (FR-01..19)",
+    "summary": "PLP-5: Functional Requirements Catalog (FR-01..19)",
     "link": "https://bekzat-diploma-2027.youtrack.cloud/issue/PLP-5"
   },
   {
-    "task_id": "PLP-06",
+    "task_id": "PLP-6",
     "idReadable": "PLP-6",
-    "summary": "PLP-06: Non-Functional Requirements & Test Fixtures",
+    "summary": "PLP-6: Non-Functional Requirements & Test Fixtures",
     "link": "https://bekzat-diploma-2027.youtrack.cloud/issue/PLP-6"
   },
   {
-    "task_id": "PLP-07",
+    "task_id": "PLP-7",
     "idReadable": "PLP-7",
-    "summary": "PLP-07: Field-Level Access Control Matrix",
+    "summary": "PLP-7: Field-Level Access Control Matrix",
     "link": "https://bekzat-diploma-2027.youtrack.cloud/issue/PLP-7"
   },
   {
-    "task_id": "PLP-08",
+    "task_id": "PLP-8",
     "idReadable": "PLP-8",
-    "summary": "PLP-08: Session Lifecycle State Machine & Accounting Rules",
+    "summary": "PLP-8: Session Lifecycle State Machine & Accounting Rules",
     "link": "https://bekzat-diploma-2027.youtrack.cloud/issue/PLP-8"
   },
   {
-    "task_id": "PLP-09",
+    "task_id": "PLP-9",
     "idReadable": "PLP-9",
-    "summary": "PLP-09: System Context Diagram & Architecture Narrative",
+    "summary": "PLP-9: System Context Diagram & Architecture Narrative",
     "link": "https://bekzat-diploma-2027.youtrack.cloud/issue/PLP-9"
   },
   {
