@@ -62,7 +62,7 @@ The ten uniform criteria evaluated across all candidate systems are:
 
 ### 4.1 Focusmate
 - **Primary Domain**: Virtual coworking and accountability body-doubling.
-- **Evidence Sources**: Focusmate Help Center ([support.focusmate.com](https://support.focusmate.com), accessed October 2026); Focusmate Community Guidelines (2024); Baltaxe-Admony et al. (2024).
+- **Evidence Sources**: Focusmate Help Center ([support.focusmate.com](https://support.focusmate.com), accessed October 2026); Focusmate Community Guidelines (2024); Eagle et al. (2024).
 - **Observed Workflow**: Users book calendar slots (25, 50, or 75 minutes). Focusmate pairs users automatically based strictly on schedule availability. Users join a 1-to-1 video/text room, verbally declare their goals, work in quiet synchronization, and wrap up verbally at the end.
 - **Analysis against Criteria**:
   - *Strengths (C6, C7)*: Strict schedule-based slot allocation and deterministic session duration provide strong accountability.

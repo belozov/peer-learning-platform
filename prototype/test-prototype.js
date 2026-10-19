@@ -392,8 +392,7 @@ runTest('Invariants #18 & #19: Exact 5 Terminal Reasons & Blocking Guard', () =>
 // SUMMARY
 // ============================================================================
 console.log('\n================================================================');
-console.log(`TEST SUITE RESULTS: ${passedTests}/${totalTests} TESTS PASSED (100%)`);
-console.log('Automated Invariants Verification Completed using actual prototype/app.js');
+console.log('Prototype Test Suite Completed: Verified client-side interactions, canonical fixtures, and state machine guards (Production PostgreSQL concurrency & WebSockets remain Working-V1 scope).');
 console.log('================================================================\n');
 
 if (passedTests !== totalTests) {
