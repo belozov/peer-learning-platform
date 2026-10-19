@@ -105,7 +105,7 @@ flowchart LR
 
 1. **Identity & Profile Module (`/auth`, `/users`)**:
    - Manages user accounts, bcrypt password hashing, and session tokens.
-   - Manages topic-specific knowledge levels, normalized goals, spoken languages, and weekly availability intervals.
+   - Manages topic-specific knowledge levels, normalized goals, spoken languages, and dated availability intervals.
    - Enforces field-level access control (FR-01, FR-02, FR-15).
 2. **Community & Content Gate Module (`/communities`, `/channels`, `/posts`)**:
    - Organizes communities and topic channels.
@@ -120,16 +120,18 @@ flowchart LR
    - Coordinates the one-to-one session lifecycle (`scheduled → active → ended/cancelled/no_show`).
    - Authenticates WebSocket connections and guarantees message isolation between accepted participants (FR-10).
    - Handles the 60-second disconnection grace period (FR-17).
+   - Enforces exact terminal reasons: `manual_exit`, `scheduled_end`, `allowance_exhaustion`, `connection_interruption`, `blocked`.
 5. **Time Accounting & Usage Ledger Module (`/accounting`)**:
-   - Server-authoritative tracking of active session duration.
-   - Manages the **180-minute daily study allowance** per learner (Confirmed).
-   - Enforces UTC day boundaries (`00:00–24:00 UTC`) and splits cross-midnight usage atomically (FR-11).
+   - Server-authoritative tracking of active session duration in integer seconds.
+   - Manages the **180-minute daily study allowance** (10,800 integer seconds) per learner (Confirmed).
+   - Enforces UTC day boundaries (`00:00–24:00 UTC`) and splits cross-midnight usage atomically without display rounding affecting ledger state (FR-11).
 6. **Outcomes & Reputation Module (`/outcomes`, `/reviews`)**:
-   - Manages post-session dual outcome confirmation: notes become confirmed outcomes only when both learners approve identical text (FR-12).
-   - Manages single partner review submissions for sessions $\ge 5\text{ accounted minutes}$ (FR-13).
+   - Recording session outcomes is Confirmed. Requiring both participants to confirm the same outcome version is Proposed. If implemented, mutual confirmation follows FR-12’s version-safe protocol (`version`, `last_editor_id`, `approved_version_a`, `approved_version_b`) and contributes to reputation only under the separately proposed eligibility rules.
+   - Manages single partner review submissions for sessions $\ge 300\text{ accounted seconds}$ (FR-13).
    - Aggregates decomposed reputation metrics (completed sessions, total hours, average rating, confirmed topics) (FR-19).
 7. **Safety & Moderation Module (`/safety`, `/moderation`)**:
    - Manages bidirectional user blocks, suppressing discovery and communication.
+   - Cancels scheduled sessions, terminates active sessions with reason `blocked`, preserves participant read-only archives, and disables new outcome edits between blocked learners.
    - Queues and processes abuse reports for administrative resolution (FR-16).
 
 ---
@@ -138,91 +140,103 @@ flowchart LR
 
 To satisfy data integrity requirements (NFR-02), two critical database workflows require atomic isolation:
 
-### 4.1 Concurrent Listing Acceptance Workflow
-When a listing author accepts a respondent, concurrent acceptance requests must be serialized to prevent double-booking or duplicate sessions:
-```sql
--- Specification Pseudocode (Atomic Acceptance Routine)
-BEGIN TRANSACTION ISOLATION LEVEL READ COMMITTED;
+### 4.1 Participant locking and atomic acceptance
 
-  -- 1. Acquire exclusive row-level lock on the listing
-  SELECT id, status, author_id, channel_id, scheduled_start_time, duration_minutes 
-  FROM study_listings 
-  WHERE id = :listing_id FOR UPDATE;
+**Classification: Proposed implementation design.**
 
-  -- 2. Verify listing is still open
-  IF study_listings.status != 'open' THEN
-    ROLLBACK;
-    RAISE EXCEPTION 'Listing is no longer open for acceptance';
-  END IF;
+A listing lock prevents two acceptances of the same listing. Preventing overlapping bookings across different listings additionally requires serialization on the participating learners.
 
-  -- 3. Verify respondent has pending response and neither party has blocked the other
-  PERFORM 1 FROM listing_responses lr
-  WHERE lr.id = :response_id AND lr.listing_id = :listing_id AND lr.status = 'pending'
-    AND NOT EXISTS (
-      SELECT 1 FROM user_blocks ub 
-      WHERE (ub.blocker_id = study_listings.author_id AND ub.blocked_id = lr.respondent_id)
-         OR (ub.blocker_id = lr.respondent_id AND ub.blocked_id = study_listings.author_id)
-    );
-  IF NOT FOUND THEN
-    ROLLBACK;
-    RAISE EXCEPTION 'Respondent response is invalid or communication is blocked';
-  END IF;
+#### Shared lock protocol
 
-  -- 4. Verify neither participant has conflicting accepted sessions across any listing
-  PERFORM 1 FROM study_sessions s
-  WHERE (s.user_a_id IN (study_listings.author_id, :respondent_id) OR s.user_b_id IN (study_listings.author_id, :respondent_id))
-    AND s.status IN ('scheduled', 'active')
-    AND tsrange(s.scheduled_start_time, s.scheduled_start_time + (s.duration_minutes * INTERVAL '1 minute')) &&
-        tsrange(study_listings.scheduled_start_time, study_listings.scheduled_start_time + (study_listings.duration_minutes * INTERVAL '1 minute'));
-  IF FOUND THEN
-    ROLLBACK;
-    RAISE EXCEPTION 'Schedule collision detected for one of the participants';
-  END IF;
+All operations that create, release, or change bookings must use the following protocol:
 
-  -- 5. Transition listing status
-  UPDATE study_listings SET status = 'matched' WHERE id = :listing_id;
+1. Read resource identifiers to discover the affected participants. This preliminary read grants no authorization and makes no final eligibility decision.
+2. Begin a database transaction.
+3. Lock the affected `users` rows using `SELECT … FOR UPDATE`, acquiring them individually in ascending UUID order.
+4. Acquire any additional required locks in this order:
+   - `study_listings`, ascending ID;
+   - `listing_responses`, ascending ID;
+   - `study_sessions`, ascending ID;
+   - `session_outcomes`, ascending ID.
+5. Re-read and validate the affected resources after locking.
+6. Perform the state changes and commit.
 
-  -- 6. Mark accepted response
-  UPDATE listing_responses SET status = 'accepted' WHERE id = :response_id;
+Only lock classes required by the operation are acquired. No operation may acquire an earlier lock class after acquiring a later one. Do not perform network calls while holding these locks.
 
-  -- 7. Automatically decline all other candidate responses
-  UPDATE listing_responses 
-  SET status = 'declined' 
-  WHERE listing_id = :listing_id AND id != :response_id AND status = 'pending';
+Participant identities on existing listings, responses, and sessions are immutable. Derive the respondent from the response record, not from an independently supplied respondent ID.
 
-  -- 8. Initialize scheduled session
-  INSERT INTO study_sessions (listing_id, user_a_id, user_b_id, status, scheduled_start_time, duration_minutes)
-  VALUES (:listing_id, study_listings.author_id, :respondent_id, 'scheduled', study_listings.scheduled_start_time, study_listings.duration_minutes);
+All booking creation paths must acquire participant locks. The same protocol applies to acceptance, withdrawal/re-response, blocking, cancellation, session start, and finalization. Membership and availability changes must acquire the changing learner’s user-row lock so that acceptance observes a consistent ordering relative to those changes.
 
-COMMIT;
-```
+#### Acceptance-time checks
 
-### 4.2 Idempotent Session Finalization Workflow
-When an active session ends, the finalization routine ensures counted minutes are inserted exactly once into `usage_ledgers`:
-```sql
-BEGIN TRANSACTION ISOLATION LEVEL READ COMMITTED;
+After locking both participants, the listing, and its relevant responses, verify:
 
-  -- Lock session record
-  SELECT id, status FROM study_sessions WHERE id = :session_id FOR UPDATE;
+- The authenticated actor is the listing author.
+- The listing is `open` and its start is still in the future.
+- The chosen response belongs to this listing and remains `pending`.
+- The respondent differs from the author.
+- Both accounts are permitted to participate.
+- Both learners remain channel members.
+- Neither learner has blocked the other.
+- The listing language remains declared by both participants.
+- The respondent’s dated availability covers the complete listing interval. The author’s listing is their explicit availability declaration for that interval.
+- Neither participant has a `scheduled` or `active` session whose reserved interval overlaps the proposed interval.
 
-  IF study_sessions.status = 'active' THEN
-    -- Finalize session record
-    UPDATE study_sessions 
-    SET status = 'ended', 
-        ended_at = :ended_at,
-        counted_duration_seconds = :counted_seconds,
-        end_reason = :end_reason
-    WHERE id = :session_id;
+Use half-open intervals `[start, end)`. Compare `TIMESTAMPTZ` values using equivalent timezone-aware interval logic, such as `tstzrange`.
 
-    -- Apportion minutes to usage ledger by UTC date
-    INSERT INTO usage_ledgers (session_id, user_id, utc_date, counted_minutes)
-    VALUES 
-      (:session_id, :user_a_id, :utc_date, :counted_minutes),
-      (:session_id, :user_b_id, :utc_date, :counted_minutes);
-  END IF;
+Then atomically:
 
-COMMIT;
-```
+1. Set the listing to `matched`.
+2. Set the selected response to `accepted`.
+3. Set other pending responses to `declined`.
+4. Create one `scheduled` session containing the immutable participant IDs and scheduled interval.
+
+Retain `UNIQUE(study_sessions.listing_id)` as an additional integrity constraint. A schedule-conflict check without participant locking does not satisfy this specification.
+
+#### Withdrawal and re-response
+
+Withdrawal acquires locks for the listing author and respondent, then the listing and response.
+
+- `pending → withdrawn` is permitted.
+- Repeated withdrawal of an already withdrawn response returns its existing state.
+- Withdrawal after acceptance returns a state-conflict response; cancelling the resulting scheduled session is a separate action.
+- Re-response changes the same response row from `withdrawn → pending`, after checking that the listing remains open and eligibility still holds.
+- Re-response never creates a second row for the same listing–respondent pair.
+
+Acceptance and withdrawal therefore serialize:
+
+- If withdrawal commits first, acceptance rejects the withdrawn response.
+- If acceptance commits first, withdrawal rejects the accepted response.
+
+#### Blocking
+
+Blocking acquires both users’ locks in ascending order before changing the relationship.
+
+Within the same transaction, it:
+
+- Creates the directional block if absent.
+- Withdraws pending responses between the pair.
+- Removes their friendship relationship.
+- Cancels scheduled sessions between the pair.
+- Finalizes active sessions between the pair using the accounting rules.
+- Prevents subsequent acceptance, responses, friendship requests, and session messages between them.
+
+Acquire affected listing, response, and session locks in the shared order.
+
+If acceptance commits before blocking, blocking cancels the newly scheduled session. If blocking commits first, acceptance fails its block check. Neither ordering leaves a usable booking between blocked participants.
+
+### Acceptance fixtures
+
+| ID | Scenario | Expected result |
+| --- | --- | --- |
+| **C-01: Cross-listing race** | A accepts P on listing X, 14:00–15:00. Simultaneously B accepts P on listing Y, 14:30–15:30. | Both transactions require P’s user-row lock. One commits; the other subsequently detects the committed overlap and returns `409 SCHEDULE_CONFLICT`. Exactly one booking exists. |
+| **C-02: Back-to-back bookings** | Same participants are booked 14:00–15:00 and 15:00–16:00. | No overlap solely from the shared endpoint. |
+| **C-03: Withdrawal race** | Author accepts while respondent withdraws. | One serial ordering applies. A response cannot finish as withdrawn while its acceptance simultaneously creates a valid session. |
+| **C-04: Block race** | Author accepts while either party blocks the other. | Acceptance either fails, or its resulting scheduled session is cancelled by the block transaction. No usable shared booking survives. |
+
+### 4.2 Canonical session finalization reference
+
+Session finalization uses the canonical algorithm in `session-lifecycle.md` §§3 and 5. It acquires participant locks before the session lock, computes the effective end, splits integer-second usage by UTC day, and commits session and ledger changes atomically. No separate finalization algorithm is maintained here.
 
 ---
 

@@ -24,12 +24,12 @@ graph TD
         WS_Gate["WebSocket Gateway (ws / RFC 6455)<br/>(Session Connection Manager & 60s Grace Timer)"]
 
         subgraph CoreModules["Domain Subsystems"]
-            M_Auth["Identity & Profile Module<br/>(Users, Topics, Availability Slots)"]
+            M_Auth["Identity & Profile Module<br/>(Users, Topics, Dated Availability Intervals)"]
             M_Channel["Community & Content Gate Module<br/>(Communities, Channels, Posts, Gating Logic)"]
             M_Match["Listing & Pure Compatibility Engine<br/>(Eligibility Filters, Jaccard T, Goal G, Level L)"]
-            M_Session["Session Coordination Service<br/>(State Transitions: Scheduled, Active, Ended)"]
-            M_Acct["Time Accounting & Usage Ledger<br/>(180m Cap, UTC Day Boundary Splitting)"]
-            M_Rep["Reputation & Review Service<br/>(Dual-Outcome Approval, 5m Qualification)"]
+            M_Session["Session Coordination Service<br/>(5 Reasons: manual_exit, scheduled_end, allowance_exhaustion, connection_interruption, blocked)"]
+            M_Acct["Time Accounting & Usage Ledger<br/>(180m / 10,800s Cap, UTC Day Splitting)"]
+            M_Rep["Reputation & Review Service<br/>(Version-Safe Outcomes, 300s Review Qualification)"]
             M_Mod["Safety & Moderation Module<br/>(User Blocks, Abuse Reports)"]
         end
 
@@ -55,8 +55,8 @@ graph TD
             T_Channels["communities / channels / channel_memberships / posts"]
             T_Listings["study_listings / listing_responses"]
             T_Sessions["study_sessions / session_messages"]
-            T_Accounting["usage_ledgers (UTC Partitioned)"]
-            T_Reputation["session_outcomes / peer_reviews"]
+            T_Accounting["usage_ledgers (Integer Seconds, UTC Apportioned)"]
+            T_Reputation["session_outcomes (Versioned) / peer_reviews"]
             T_Moderation["user_blocks / moderation_reports / friendships"]
         end
 

@@ -60,12 +60,13 @@ Represents platform accounts across all roles (FR-01, FR-15).
 | `updated_at` | `TIMESTAMPTZ` | `NOT NULL DEFAULT NOW()` | Profile modification instant. |
 
 #### `learning_preferences`
-Per-topic structured skill levels and study goals (FR-02).
+Per-topic structured skill levels, goals, and preference tags (FR-02).
 | Column | Type | Constraints | Description |
 | :--- | :--- | :--- | :--- |
 | `id` | `UUID` | `PRIMARY KEY DEFAULT gen_random_uuid()` | Unique preference record ID. |
 | `user_id` | `UUID` | `NOT NULL REFERENCES users(id) ON DELETE CASCADE` | Associated learner. |
 | `topic` | `VARCHAR(64)` | `NOT NULL` | Subject domain (e.g., `'Python'`, `'Mathematics'`). |
+| `topic_tags` | `TEXT[]` | `NOT NULL DEFAULT '{}'` | Canonical tag IDs (duplicates removed during validation). Empty disables scoring. |
 | `knowledge_level` | `SMALLINT` | `NOT NULL CHECK (knowledge_level IN (1, 2, 3))` | Self-reported level (1=Beginner, 2=Interm, 3=Adv). |
 | `goal_category` | `VARCHAR(64)` | `NOT NULL` | Default goal category enum. |
 | `spoken_languages` | `TEXT[]` | `NOT NULL CHECK (cardinality(spoken_languages) > 0)` | Array of ISO language codes (e.g., `{'en', 'ru'}`). |
@@ -74,14 +75,15 @@ Per-topic structured skill levels and study goals (FR-02).
 | *Constraints* | `UNIQUE (user_id, topic)` | — | Decouples topic proficiency independently. |
 
 #### `availability_slots`
-Declared recurring weekly availability windows for scheduling overlap checks (FR-02, FR-07).
+Explicit dated UTC availability intervals for scheduling overlap checks (FR-02, FR-07). Proposed V1 simplification uses explicit dates entered/displayed via learner's IANA timezone, rather than recurring weekly series.
 | Column | Type | Constraints | Description |
 | :--- | :--- | :--- | :--- |
 | `id` | `UUID` | `PRIMARY KEY DEFAULT gen_random_uuid()` | Unique slot ID. |
 | `user_id` | `UUID` | `NOT NULL REFERENCES users(id) ON DELETE CASCADE` | Associated learner. |
-| `day_of_week` | `SMALLINT` | `NOT NULL CHECK (day_of_week BETWEEN 0 AND 6)` | 0 = Sunday, 1 = Monday, ..., 6 = Saturday. |
-| `start_time_utc` | `TIME` | `NOT NULL` | Slot start time in UTC. |
-| `end_time_utc` | `TIME` | `NOT NULL CHECK (end_time_utc > start_time_utc)` | Slot end time in UTC. |
+| `starts_at` | `TIMESTAMPTZ` | `NOT NULL` | Interval start instant in UTC. |
+| `ends_at` | `TIMESTAMPTZ` | `NOT NULL CHECK (ends_at > starts_at)` | Interval end instant in UTC. |
+| `created_at` | `TIMESTAMPTZ` | `NOT NULL DEFAULT NOW()` | Slot creation timestamp. |
+| `updated_at` | `TIMESTAMPTZ` | `NOT NULL DEFAULT NOW()` | Slot update timestamp. |
 
 ---
 
@@ -158,11 +160,10 @@ Structured study requests published by channel members (FR-06, FR-07).
 | `id` | `UUID` | `PRIMARY KEY DEFAULT gen_random_uuid()` | Unique listing ID. |
 | `channel_id` | `UUID` | `NOT NULL REFERENCES channels(id) ON DELETE CASCADE` | Parent topic channel. |
 | `author_id` | `UUID` | `NOT NULL REFERENCES users(id) ON DELETE CASCADE` | Contextual Listing Author. |
-| `topic_tags` | `TEXT[]` | `NOT NULL CHECK (cardinality(topic_tags) > 0)` | Structured sub-topic tags. |
+| `topic_tags` | `TEXT[]` | `NOT NULL CHECK (cardinality(topic_tags) > 0)` | Structured sub-topic tags (nonempty). |
 | `goal_category` | `VARCHAR(64)` | `NOT NULL CHECK (goal_category IN ('understanding_concept', 'practicing_exercises', 'preparing_assessment', 'completing_project'))` | Normalized goal enum. |
 | `goal_details` | `TEXT` | `NULL` | Free-text goal specifics for human inspection. |
 | `author_level` | `SMALLINT` | `NOT NULL CHECK (author_level IN (1, 2, 3))` | Author's declared topic knowledge level. |
-| `target_level` | `SMALLINT` | `NULL CHECK (target_level IN (1, 2, 3))` | Optional desired peer knowledge level. |
 | `language` | `VARCHAR(16)` | `NOT NULL` | Required communication language. |
 | `scheduled_start_time`| `TIMESTAMPTZ` | `NOT NULL` | Planned session start in UTC. |
 | `duration_minutes` | `SMALLINT` | `NOT NULL CHECK (duration_minutes BETWEEN 15 AND 180)` | Planned session duration. |
@@ -181,7 +182,7 @@ Peer applications to join an open study listing (FR-08, FR-09).
 | `notes` | `TEXT` | `NULL` | Optional greeting / context message. |
 | `created_at` | `TIMESTAMPTZ` | `NOT NULL DEFAULT NOW()` | Submission instant. |
 | `updated_at` | `TIMESTAMPTZ` | `NOT NULL DEFAULT NOW()` | Status change instant. |
-| *Constraints* | `UNIQUE (listing_id, respondent_id)` | — | Prevents duplicate applications. |
+| *Constraints* | `UNIQUE (listing_id, respondent_id)` | — | Permanent uniqueness per listing and respondent; re-response reuses existing row: `withdrawn → pending`. |
 
 #### `study_sessions`
 Represents the locked 1-to-1 study session (FR-09, FR-10, FR-11, FR-17).
@@ -196,10 +197,11 @@ Represents the locked 1-to-1 study session (FR-09, FR-10, FR-11, FR-17).
 | `duration_minutes` | `SMALLINT` | `NOT NULL` | Planned duration in minutes. |
 | `actual_start_time` | `TIMESTAMPTZ` | `NULL` | Mutual join/start instant. |
 | `ended_at` | `TIMESTAMPTZ` | `NULL` | Termination instant. |
-| `counted_duration_seconds`| `INTEGER` | `NOT NULL DEFAULT 0` | Monotonic server-counted seconds. |
-| `end_reason` | `VARCHAR(32)` | `NULL CHECK (end_reason IN ('manual_exit', 'scheduled_end', 'allowance_exhaustion', 'connection_interruption'))` | Termination trigger. |
+| `counted_duration_seconds`| `INTEGER` | `NOT NULL DEFAULT 0 CHECK (counted_duration_seconds >= 0)` | Monotonic server-counted seconds. |
+| `end_reason` | `VARCHAR(32)` | `NULL CHECK (end_reason IN ('manual_exit', 'scheduled_end', 'allowance_exhaustion', 'connection_interruption', 'blocked'))` | Exact termination trigger. |
 | `created_at` | `TIMESTAMPTZ` | `NOT NULL DEFAULT NOW()` | Creation instant. |
 | `updated_at` | `TIMESTAMPTZ` | `NOT NULL DEFAULT NOW()` | State change instant. |
+| *Constraints* | `CHECK (user_a_id != user_b_id)` | — | Prohibits self-sessions. |
 
 #### `session_messages`
 Synchronous text chat exchanged during active sessions (FR-10).
@@ -223,24 +225,25 @@ Maintains accounted study time apportioned by user and calendar date (FR-11).
 | `session_id` | `UUID` | `NOT NULL REFERENCES study_sessions(id) ON DELETE CASCADE` | Associated session. |
 | `user_id` | `UUID` | `NOT NULL REFERENCES users(id) ON DELETE CASCADE` | Credited learner. |
 | `utc_date` | `DATE` | `NOT NULL` | Accounting calendar date (UTC). |
-| `counted_minutes` | `SMALLINT` | `NOT NULL CHECK (counted_minutes >= 0)` | Minutes deducted from daily allowance. |
+| `counted_seconds` | `INTEGER` | `NOT NULL CHECK (counted_seconds > 0)` | Seconds deducted from daily allowance. Written at finalization only. |
 | `created_at` | `TIMESTAMPTZ` | `NOT NULL DEFAULT NOW()` | Immutable audit insertion instant. |
-| *Constraints* | `UNIQUE (session_id, user_id, utc_date)` | — | Prevents duplicate time accrual. |
+| *Constraints* | `UNIQUE (session_id, user_id, utc_date)` | — | Prevents duplicate time accrual per session and date. Aggregate daily cap enforced at service layer. |
 
 #### `session_outcomes`
-Mutually approved topics and study notes (FR-12).
+Mutually approved topics and study notes under version-safe confirmation (FR-12). Recording outcomes is Confirmed; requiring mutual confirmation is Proposed.
 | Column | Type | Constraints | Description |
 | :--- | :--- | :--- | :--- |
 | `id` | `UUID` | `PRIMARY KEY DEFAULT gen_random_uuid()` | Unique outcome record ID. |
 | `session_id` | `UUID` | `NOT NULL UNIQUE REFERENCES study_sessions(id) ON DELETE CASCADE` | 1 outcome per session. |
-| `author_id` | `UUID` | `NOT NULL REFERENCES users(id)` | Learner who drafted the notes. |
-| `topics_covered` | `TEXT[]` | `NOT NULL` | Array of confirmed sub-topic tags. |
+| `version` | `INTEGER` | `NOT NULL DEFAULT 1 CHECK (version > 0)` | Monotonic version number; increments on every edit. |
+| `last_editor_id` | `UUID` | `NOT NULL REFERENCES users(id)` | Learner who last saved this outcome (participant A or B). |
+| `approved_version_a` | `INTEGER` | `NULL CHECK (approved_version_a IS NULL OR approved_version_a = version)` | Current version approved by Participant A (`user_a_id`). |
+| `approved_version_b` | `INTEGER` | `NULL CHECK (approved_version_b IS NULL OR approved_version_b = version)` | Current version approved by Participant B (`user_b_id`). |
+| `topics_covered` | `TEXT[]` | `NOT NULL` | Reported shared topics for the current outcome version. |
 | `outcome_notes` | `TEXT` | `NULL` | Shared study notes / problem solutions. |
-| `version` | `INTEGER` | `NOT NULL DEFAULT 1` | Increments on any modification. |
-| `is_mutually_confirmed`| `BOOLEAN` | `NOT NULL DEFAULT FALSE` | True only when approved by partner. |
-| `partner_confirmed_at` | `TIMESTAMPTZ` | `NULL` | Partner approval instant. |
 | `created_at` | `TIMESTAMPTZ` | `NOT NULL DEFAULT NOW()` | Initial submission instant. |
 | `updated_at` | `TIMESTAMPTZ` | `NOT NULL DEFAULT NOW()` | Modification instant. |
+| *Derived Rule* | `is_confirmed = (approved_version_a = version AND approved_version_b = version)` | — | Derived mutual agreement; not an independent stored boolean. |
 
 #### `peer_reviews`
 Post-session peer reviews for sessions $\ge 5\text{ accounted minutes}$ (FR-13, FR-19).
@@ -313,7 +316,7 @@ CREATE INDEX idx_listings_topic_tags_gin ON study_listings USING GIN (topic_tags
 -- 4. Fast channel membership gating check
 CREATE INDEX idx_memberships_user_channel ON channel_memberships(user_id, channel_id);
 
--- 5. Active session lookup per user (enforces single concurrent active session)
+-- 5. Active session lookup per user (lookup optimization; concurrency enforced by participant locks)
 CREATE INDEX idx_sessions_active_participants ON study_sessions(user_a_id, user_b_id) 
 WHERE status = 'active';
 

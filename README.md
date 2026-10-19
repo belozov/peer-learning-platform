@@ -59,7 +59,7 @@ The project explicitly delineates two distinct delivery phases:
   - Eligibility gating: language match and complete scheduled interval overlap $[t_{\text{start}}, t_{\text{end}})$.
   - Server-authoritative session timer with a confirmed daily study allowance ($180\text{ min/day}$).
   - Accounted participation tracking (*measures accounted active participation duration, not verified attention or learning mastery*).
-  - Post-session mutual outcome confirmation and single-review submission ($\ge 5\text{ min}$ threshold).
+  - Post-session outcome recording (Confirmed) with proposed version-safe mutual confirmation and single-review submission ($\ge 300\text{ s}$ threshold).
 - **Confirmed Exclusions**:
   - Commercial/monetized features: Paid teacher verification, paid tutoring services, creator rewards, and payment gateways.
   - Heavy media infrastructure: Excludes voice and video calling; sessions focus strictly on synchronous in-platform text chat.

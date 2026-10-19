@@ -27,9 +27,9 @@ stateDiagram-v2
 ### 1.1 Formal State Definitions
 - **`scheduled`**: The listing author has accepted a respondent. The session slot is reserved. Real-time chat is disabled and timers are inactive.
 - **`active`**: Both participants have connected and explicitly confirmed start after `scheduled_start`. Chat is active and monotonic server time tracking is running.
-- **`ended`**: Terminal state. Active session ended via an authorized trigger. Chat is locked to read-only history. Counted duration is finalized into immutable `usage_ledgers`.
-- **`cancelled`** *(Terminal Alternative)*: Either participant cancelled before start, or an active block was placed before start. 0 study minutes credited.
-- **`no_show`** *(Terminal Alternative)*: Neither participant joined, or one participant arrived but the other failed to join within 10 minutes of `scheduled_start`. 0 study minutes credited.
+- **`ended`**: Terminal state. Active session ended via an authorized trigger (`scheduled_end`, `manual_exit`, `allowance_exhaustion`, `connection_interruption`, `blocked`). Chat is locked to read-only history for participants. Counted duration is finalized into immutable `usage_ledgers`.
+- **`cancelled`** *(Terminal Alternative)*: Either participant cancelled before start, or an active block was placed before start. 0 study seconds credited.
+- **`no_show`** *(Terminal Alternative)*: Neither participant joined, or one participant arrived but the other failed to join within 10 minutes of `scheduled_start`. 0 study seconds credited.
 
 ---
 
@@ -53,20 +53,74 @@ stateDiagram-v2
 
 ---
 
-## 3. Daily Allowance & Midnight Accounting Rules
+## 3. Daily allowance and accounting boundaries
 
-### 3.1 180-Minute Daily Study Allowance (Confirmed)
-- Each free learner account is allocated **180 total study minutes per calendar day** across all sessions (Confirmed requirement).
-- When either participant's remaining daily allowance reaches 0, the active session terminates immediately with reason `allowance_exhaustion`, locking chat and ledgering accrued time.
+**Confirmed:** each free learner has **180 total study minutes per day**, shared across sessions.
 
-### 3.2 UTC Reset & Cross-Midnight Apportionment (Proposed Design Rule)
-- **Accounting Boundary**: The daily boundary is defined as **00:00:00 to 24:00:00 UTC** (Proposed).
-- **Cross-Midnight Apportionment**: When an active session spans across the `00:00:00 UTC` boundary, active minutes are apportioned into distinct accounting days:
-  - Minutes elapsed before 24:00 UTC are charged to Day 1.
-  - Minutes elapsed after 00:00 UTC are charged to Day 2 from the refreshed 180-minute allowance.
-- **Exhaustion & Reset Precedence**:
-  1. *Exhaustion before midnight*: If a participant has only 10 minutes of remaining allowance on Day 1 and a session begins at 23:45 UTC, the allowance exhausts at **23:55 UTC**. The session terminates at 23:55 UTC with reason `allowance_exhaustion`. It does not reach midnight.
-  2. *Survival past midnight*: If both participants have $\ge 15$ minutes of allowance remaining on Day 1, the session runs to 00:00:00 UTC. At midnight, Day 1 is ledgered for 15 minutes, Day 2 allowance refreshes to 180 minutes, and the session continues until scheduled end, subject to Day 2 allowance.
+**Proposed implementation rules:** UTC accounting days, integer-second accounting, and the exact-midnight precedence policy below.
+
+### 3.1 Units and intervals
+
+- The daily allowance is represented as **10,800 integer seconds**.
+- Authoritative accounting timestamps use whole-second resolution.
+- A session’s charged interval is `[actual_start_time, effective_end_time)`.
+- No rounding upward is applied to sessions or daily segments.
+- Minutes are a display conversion only; the authoritative ledger stores seconds.
+- Both participants receive identical session-duration charges.
+
+A late start does not extend `scheduled_end = scheduled_start_time + duration_minutes × 60 seconds`.
+
+### 3.2 Chosen exact-midnight policy: exhaustion first
+
+**Proposed:** if either learner exhausts their old-day allowance exactly at midnight, the session ends at midnight. The new day’s allowance does not revive or automatically restart that session.
+
+If both learners still have positive old-day allowance immediately before crossing midnight after charging the preceding interval, the session may continue into the new accounting day.
+
+A session whose scheduled end is midnight ends at midnight regardless of the allowance reset.
+
+This policy preserves the rule that exhausting the applicable allowance ends the session.
+
+### 3.3 Day-boundary splitting
+
+For each UTC date touched by the charged interval, compute the intersection:
+
+`[actual_start_time, effective_end_time) ∩ [day_start, next_day_start)`
+
+The intersection’s length in integer seconds is that date’s charge for each participant. Do not create zero-second ledger rows.
+
+For V1, ledger rows are written only during finalization. While a session is active, remaining allowance is calculated from:
+
+1. Finalized ledger usage for that learner and UTC date; plus
+2. The active session’s elapsed charge attributable to that date.
+
+This avoids both duplicate midnight writes and omission of active usage. Before starting another session, any prior active session must be reconciled and finalized where due.
+
+### 3.4 Effective termination time
+
+The effective end is the earliest applicable instant among:
+
+- Fixed scheduled end.
+- Either participant’s allowance-exhaustion instant.
+- An authorized manual-end event.
+- An authorized blocking event.
+- Disconnection-grace expiry.
+- A recovery cutoff established under the documented restart rule.
+
+Manual-end and blocking events take effect at the server’s authorized state transition while holding the required locks. Clients cannot supply effective timestamps.
+
+Allowance exhaustion is calculated chronologically through each UTC-day segment. Reaching zero at a day boundary ends the session before replenishment is considered.
+
+For equal termination instants, use this deterministic reason priority:
+
+1. `blocked`
+2. `allowance_exhaustion`
+3. `scheduled_end`
+4. `connection_interruption`
+5. `manual_exit`
+
+This priority selects a reason only; it does not change the charged interval.
+
+A delayed timer or finalization worker does not extend the session. Message handling must reject a message at or after the effective end, even if the stored status has not yet been reconciled.
 
 ---
 
@@ -80,69 +134,44 @@ stateDiagram-v2
    The session transitions to `ended`. Accrued time up to the disconnection point plus the 60s grace interval is ledgered.
 
 ### 4.2 Additional Failure & Edge Scenarios
-- **Neither Participant Arrives**: If 10 minutes elapse past `scheduled_start` and neither user clicks Start, the server marks the session `no_show`. Counted time = 0 min.
-- **One Participant Arrives, Partner Missing**: If User A clicks Start but User B fails to arrive within 10 minutes of `scheduled_start`, User A may click "Claim No-Show" (or server auto-expires). Session transitions to `no_show`. Counted time = 0 min.
-- **Active Session Blocking**: If either participant blocks the other during an active session, the session terminates immediately with reason `manual_exit` (or `blocked`). Chat is terminated, accrued time up to that point is finalized once, and no new contact is permitted.
+- **Neither Participant Arrives**: If 10 minutes elapse past `scheduled_start` and neither user clicks Start, the server marks the session `no_show`. Counted time = 0 seconds.
+- **One Participant Arrives, Partner Missing**: If User A clicks Start but User B fails to arrive within 10 minutes of `scheduled_start`, User A may click "Claim No-Show" (or server auto-expires). Session transitions to `no_show`. Counted time = 0 seconds.
+- **Active Session Blocking**: Blocking stops future contact, not access to a participant’s existing records. Both participants retain read-only access to their shared session archive after blocking. Other learners and friends have no access. Administrators may access relevant chat evidence only through an active moderation report filed by a participant. Blocking disables new shared-outcome edits and confirmations between the pair. Existing outcomes remain readable. Reporting remains available. Eligible post-session reviews remain governed by FR-13 and do not reopen chat. A scheduled shared session becomes `cancelled`, with no charge. An active shared session ends using reason `blocked`, subject to any earlier effective termination boundary. Its accrued usage is finalized once.
 - **Server Restart Recovery**: The server persists active session start timestamps and regular heartbeat markers. Upon service recovery, any orphaned `active` sessions are finalized based on the last recorded heartbeat, preventing unbounded timer drift.
 
 ---
 
 ## 5. Terminal Triggers & Idempotent Finalization
 
+**Classification: Proposed implementation design.**
+
 ### 5.1 Terminal Reasons
-When a session enters `ended`, one immutable `end_reason` is recorded:
-- `scheduled_end`: Normal completion at `scheduled_start + duration`.
-- `manual_exit`: Participant voluntarily clicked "End Session Early".
-- `allowance_exhaustion`: Either participant reached 0 remaining allowance minutes.
-- `connection_interruption`: Disconnected partner did not return within 60s.
+When a session enters `ended`, one immutable `end_reason` is recorded from the exact set of five:
+1. `blocked`: Authorized blocking committed during active session.
+2. `allowance_exhaustion`: Allowance reduced to 0 integer seconds.
+3. `scheduled_end`: Fixed scheduled end reached.
+4. `connection_interruption`: Disconnected partner failed to reconnect within 60-second grace.
+5. `manual_exit`: Participant voluntarily clicked "End Session Early".
 
-### 5.2 Idempotent Database Finalization (Specification Logic)
-Finalization executes atomically and must guard against double-finalizing or modifying non-active sessions:
+### 5.2 Idempotent Database Finalization
 
-```sql
--- Specification Logic (Pseudocode for Transactional Finalization)
-BEGIN TRANSACTION;
+Finalization follows architecture §4.1’s lock protocol: lock both participant user rows in ascending order, then the session row.
 
-  -- 1. Lock the session row exclusively
-  SELECT id, status, actual_start_time, scheduled_start_time, duration_minutes
-  FROM study_sessions 
-  WHERE id = :session_id 
-  FOR UPDATE;
+1. If status is `ended`, return the existing final result and ledger entries without modification.
+2. If status is `scheduled`, `cancelled`, or `no_show`, reject active-session finalization with a state conflict.
+3. If status is `active`:
+   - Determine the effective end from server-owned state and the rules in §3.
+   - Calculate the total integer-second duration.
+   - Split the interval into UTC-day charges.
+   - Change status to `ended`, recording the effective end, duration, and reason.
+   - Insert one positive ledger row per participant per charged UTC date.
+4. Commit the session change and all ledger rows atomically.
 
-  -- 2. Validate current state: ONLY 'active' sessions can be finalized
-  IF study_sessions.status = 'ended' THEN
-    -- Already finalized: Return existing record idempotently without error
-    COMMIT;
-    RETURN;
-  ELSIF study_sessions.status != 'active' THEN
-    -- Scheduled, Cancelled, or No-Show cannot be finalized as completed
-    ROLLBACK;
-    RAISE EXCEPTION 'Cannot finalize session in state: %', study_sessions.status;
-  END IF;
+Enforce `UNIQUE(session_id, user_id, utc_date)`.
 
-  -- 3. Calculate counted duration bounded by scheduled end
-  v_scheduled_end := study_sessions.scheduled_start_time + (study_sessions.duration_minutes * INTERVAL '1 minute');
-  v_effective_end := LEAST(:current_time, v_scheduled_end);
-  v_counted_seconds := GREATEST(0, EXTRACT(EPOCH FROM (v_effective_end - study_sessions.actual_start_time)));
+Do not use `ON CONFLICT DO NOTHING` to hide a conflicting ledger value. An unexpected existing ledger row for an active session is an integrity error and causes rollback. A normal retry encounters an already-ended session and returns its existing result.
 
-  -- 4. Transition session status to terminal 'ended'
-  UPDATE study_sessions
-  SET status = 'ended',
-      ended_at = v_effective_end,
-      counted_duration_seconds = v_counted_seconds,
-      end_reason = :end_reason,
-      updated_at = NOW()
-  WHERE id = :session_id;
-
-  -- 5. Record usage ledger entry with uniqueness per (session_id, user_id, utc_date)
-  INSERT INTO usage_ledgers (session_id, user_id, utc_date, counted_minutes)
-  VALUES 
-    (:session_id, :user_a_id, :utc_date, CEIL(v_counted_seconds / 60.0)),
-    (:session_id, :user_b_id, :utc_date, CEIL(v_counted_seconds / 60.0))
-  ON CONFLICT (session_id, user_id, utc_date) DO NOTHING;
-
-COMMIT;
-```
+There is no valid partial commit containing ledger charges without the corresponding ended session, or an ended session without all required charges.
 
 ---
 
@@ -157,43 +186,21 @@ To prevent reputation manipulation or review spam via zero-duration sessions:
 - **Duration $< 300\text{ seconds}$ ($< 5\text{ accounted minutes}$)**:
   - The session is recorded **exclusively in the participant's private study history**.
   - Ineligible for partner reviews and public reputation indicators.
-  - Accrued minutes are still deducted from the daily allowance to prevent free-time exploitation.
+  - Accrued seconds are still deducted from the daily allowance to prevent free-time exploitation.
 
 ---
 
 ## 7. Concrete Accounting Test Fixtures
 
-*(These are formal specification fixtures against which implementations must be verified).*
+*(These are formal specification fixtures against which implementations must be verified. All remaining-allowance values refer to both learners unless stated otherwise).*
 
-### Fixture S1: Late Start Duration Cap
-- **Booked Session**: 14:00 to 15:00 UTC (duration: 60 minutes).
-- **Actual Start**: Both participants connect and click Start at 14:08 UTC.
-- **Termination**: Session terminates at 15:00 UTC (`scheduled_end`).
-- **Expected Outcome**:
-  - `status`: `ended`
-  - `counted_duration_seconds`: $52 \times 60 = 3120\text{ seconds}$ ($52\text{ minutes}$).
-  - Neither participant is credited for the 8 minutes of missed time prior to actual start.
-
-### Fixture S2: Cross-Midnight Usage with Sufficient Allowance
-- **Booked Session**: 23:45 UTC (Day 1) to 00:30 UTC (Day 2) (duration: 45 minutes).
-- **Allowances**: User A and User B have 60 min remaining on Day 1.
-- **Actual Start**: 23:45 UTC. Terminated at 00:30 UTC (`scheduled_end`).
-- **Expected Outcome**:
-  - Day 1 ledger (`utc_date = Day 1`): 15 minutes deducted from Day 1 allowance.
-  - Day 2 ledger (`utc_date = Day 2`): 30 minutes deducted from the refreshed Day 2 allowance (180 min - 30 min = 150 min remaining).
-
-### Fixture S3: Midnight Allowance Exhaustion Precedence
-- **Booked Session**: 23:45 UTC (Day 1) to 00:30 UTC (Day 2) (duration: 45 minutes).
-- **Allowances**: User A has only 10 minutes remaining on Day 1.
-- **Actual Start**: 23:45 UTC.
-- **Expected Outcome**:
-  - Session terminates at **23:55 UTC** with `end_reason = 'allowance_exhaustion'`.
-  - Day 1 ledger: 10 minutes deducted (User A allowance reaches 0).
-  - Day 2 ledger: 0 minutes (session never reaches 00:00:00 UTC).
-
-### Fixture S4: Idempotent Duplicate Finalization
-- **Scenario**: User A and User B both submit "End Session Early" simultaneously at second 1200 (20 minutes).
-- **Expected Outcome**:
-  - First transaction commits: updates status to `ended`, inserts ledger records for 20 minutes.
-  - Second transaction executes: detects `status == 'ended'`, commits without duplicate ledger insertion.
-  - Result: Exactly 20 minutes accounted to each user; 0 duplicate minutes.
+| ID | Input | Expected outcome |
+| --- | --- | --- |
+| **A-01: Exact-midnight exhaustion** | Booked 23:45–00:30. A has exactly 900 seconds remaining on Day 1; B has 3,600. Start 23:45. | End at 00:00 with `allowance_exhaustion`. Charge 900 seconds to each participant on Day 1. No Day 2 rows. Session does not restart after reset. |
+| **A-02: Sufficient allowance across midnight** | Same booking; both have 3,600 seconds remaining on Day 1. | End 00:30. Each participant receives Day 1 charge 900 and Day 2 charge 1,800. Total 2,700 seconds. |
+| **A-03: Scheduled end at midnight** | Booked 23:45–00:00; both have 3,600 seconds remaining. | End 00:00 with `scheduled_end`; charge 900 seconds on Day 1 only. |
+| **A-04: End/exhaustion tie** | Same booking as A-03; A has exactly 900 seconds remaining. | End 00:00 with `allowance_exhaustion` under the tie rule. Same 900-second charges; no Day 2 rows. |
+| **A-05: Delayed finalization** | Start 14:00; booked end 15:00. A has 600 seconds remaining. Worker runs at 14:12:07. | Effective end 14:10, reason `allowance_exhaustion`; charge 600 seconds each, not 727. Messages at or after 14:10 are rejected. |
+| **A-06: Seconds without rounding** | Start 14:00:00; authorized manual end 14:00:31. | Charge exactly 31 seconds each. No rounding to 60 seconds. |
+| **A-07: Retry** | Finalize A-02 twice, including concurrent requests. | Four ledger rows total: two participants × two positive-day segments. Repeated calls return the same final state and charges. |
+| **S-01: Non-rounded short session** | The 31-second session in A-06. | Produces two 31-second ledger rows, a session duration of 31, and no review eligibility ($31 < 300$). Its daily charge is not rounded to one minute. |

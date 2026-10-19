@@ -38,7 +38,7 @@ The platform enforces a hybrid **Role-Based Access Control (RBAC)** and **Relati
 | **Avatar URL & Bio** | R | R | R | R | R, W | R |
 | **Timezone & Primary Languages** | R | R | R | R | R, W | R |
 | **Topic Preferences & Levels** | – | R | R | R | R, W | R |
-| **Weekly Availability Slots** | – | – | – | R *(during match)* | R, W | R |
+| **Dated Availability Intervals** | – | – | – | R *(during match)* | R, W | R |
 | **Online / Presence Status** | – | – | R | R *(during session)*| R | R |
 | **Public Reputation Badges** | R | R | R | R | R | R |
 | **Previous Partners List** | – | –* *(opt-in)* | –* *(opt-in)* | –* *(opt-in)* | R, W | R |
@@ -96,11 +96,11 @@ The platform enforces a hybrid **Role-Based Access Control (RBAC)** and **Relati
 | **Cancel Scheduled Session** | – | – | – | W *(Either party)*| – | – | W *(Moderation)* |
 | **Enter Session Chat Room** | – | – | – | – | R, W | – | – |
 | **Send Session Message** | – | – | – | – | W *(During active)*| – | – |
-| **Read Session Chat History** | – | – | – | – | R | R *(Read-only archive)*| R* *(Report audit)* |
+| **Read Session Chat History** | – | – | – | – | R | R *(Read-only archive for both)*| R* *(Report audit)* |
 | **End Session Early** | – | – | – | – | W *(Either party)*| – | W *(Moderation)* |
-| **Draft Session Outcomes** | – | – | – | – | – | W *(Either partner)* | – |
-| **Confirm Outcome Notes** | – | – | – | – | – | W *(Both must approve)*| – |
-| **Submit Partner Review** | – | – | – | – | – | W *(If $\ge 5$ min)* | – |
+| **Draft Session Outcomes** | – | – | – | – | – | W *(Either partner; disabled if blocked)* | – |
+| **Confirm Outcome Notes** | – | – | – | – | – | W *(Version check; disabled if blocked)*| – |
+| **Submit Partner Review** | – | – | – | – | – | W *(If $\ge 300$ s; max 1/day)* | – |
 
 > **Audit Exception**: Administrators cannot browse session chat archives generally. Chat history is accessible to administrators **only within the context of an active moderation report** filed by one of the participants.
 
@@ -111,7 +111,7 @@ The platform enforces a hybrid **Role-Based Access Control (RBAC)** and **Relati
 | Resource / Function | Visitor | Non-Friend Learner | Friend Relationship | Account Owner | Administrator |
 | :--- | :-: | :-: | :-: | :-: | :-: |
 | **Private Study History Log** | – | – | – | R | – |
-| **Usage Ledger (Counted Minutes)**| – | – | – | R | R *(Aggregated stats)* |
+| **Usage Ledger (Counted Seconds)**| – | – | – | R | R *(Aggregated stats)* |
 | **Place Account Block** | – | W | W | – | – |
 | **Submit Misuse Report** | – | W | W | – | R *(Moderation queue)* |
 | **Suspend / Restrict Account** | – | – | – | – | W |
@@ -121,8 +121,9 @@ The platform enforces a hybrid **Role-Based Access Control (RBAC)** and **Relati
 ## 3. Relationship Lifecycle & Safety Transitions
 
 ### 3.1 Active Session Blocking Invariants
-When Learner A blocks Learner B:
-1. **Scheduled Session**: If a session between A and B is `scheduled`, it is immediately transitioned to `cancelled`. Both participants' schedules are unlocked; 0 minutes are charged.
-2. **Active Session**: If a session between A and B is currently `active`, it is immediately transitioned to `ended` with reason `manual_exit` (or `blocked`). Chat is halted immediately; accrued active time up to the block event is finalized once.
-3. **Future Contact**: Listings authored by either party are suppressed from the other's search feeds. Response submissions and friend requests between the pair are strictly rejected.
-4. **Evidence Preservation**: Session chat history remains archived on the server, accessible exclusively to platform moderators if an abuse report is filed.
+Blocking stops future contact, not access to a participant’s existing records:
+1. **Scheduled Session**: If a session between A and B is `scheduled`, it is immediately transitioned to `cancelled`. Both participants' schedules are unlocked; 0 seconds are charged.
+2. **Active Session**: If a session between A and B is currently `active`, it terminates immediately with reason `blocked`, subject to any earlier effective termination boundary. Its accrued usage is finalized once.
+3. **Archive Access**: Both participants retain read-only access to their shared session archive after blocking. Other learners and friends have no access. Administrators may access relevant chat evidence only through an active moderation report filed by a participant.
+4. **Outcomes & Reviews**: Blocking disables new shared-outcome edits and confirmations between the pair. Existing outcomes remain readable. Reporting remains available. Eligible post-session reviews remain governed by FR-13 and do not reopen chat.
+5. **Future Discovery & Contact**: Listings authored by either party are suppressed from search feeds. Future acceptance, responses, friendship requests, and session messages between them are strictly prohibited.

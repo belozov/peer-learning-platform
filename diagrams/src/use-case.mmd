@@ -35,8 +35,8 @@ graph LR
         UC12["UC-12: Join & Start 1-to-1 Session"]
         UC13["UC-13: Exchange Text Chat Messages"]
         UC14["UC-14: Track 180m Allowance & Disconnect Grace"]
-        UC15["UC-15: Confirm Mutual Session Outcomes"]
-        UC16["UC-16: Submit Partner Review (>= 5 min)"]
+        UC15["UC-15: Record Notes & Version-Safe Outcomes (Proposed)"]
+        UC16["UC-16: Submit Partner Review (>= 300s)"]
     end
 
     subgraph UC_Admin["Administration & Safety"]
@@ -80,7 +80,7 @@ graph LR
     %% Includes & Extends
     UC08 -.->|"<<include>> Check Membership"| UC05
     UC11 -.->|"<<include>> Initialize Session & Lock"| UC12
-    UC16 -.->|"<<extend>> if duration >= 5m"| UC15
+    UC16 -.->|"<<extend>> if duration >= 300s"| UC12
 
     style Actors fill:#f1f5f9,stroke:#64748b,stroke-width:1px;
     style UC_Auth fill:#eff6ff,stroke:#3b82f6,stroke-width:1px;

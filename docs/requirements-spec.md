@@ -33,14 +33,18 @@ Every requirement defines two distinct evaluation criteria and states its milest
   - `PUT /api/v1/users/me` enforces authorization; attempting `PUT /api/v1/users/:id` for another user returns HTTP 403 Forbidden.
 
 ### FR-02: Structured Learning Preferences
-- **Classification**: Confirmed / P0
-- **Summary**: Profiles record explicit, topic-specific knowledge levels, learning goals, spoken languages, and weekly availability intervals.
+- **Classification**: Confirmed / P0 *(Dated availability intervals: Proposed V1 simplification)*
+- **Summary**: Profiles record explicit, topic-specific knowledge levels, learning goals, spoken languages, and dated availability intervals.
 - **Immediate Prototype Acceptance Criteria**:
-  - Profile UI displays structured inputs: Topic dropdown (Python, English, Math), Knowledge Level (1: Beginner, 2: Intermediate, 3: Advanced), Goal Category, Spoken Languages, and Availability time blocks.
+  - Profile UI displays structured inputs: Topic dropdown (Python, English, Math), Knowledge Level (1: Beginner, 2: Intermediate, 3: Advanced), Goal Category, Spoken Languages, and Dated Availability intervals with timezone display.
   - Missing preferences are visibly flagged with an inline prompt; no default preferences are silently assumed.
+  - Learner topic preference tags persist as `topic_tags TEXT[]`.
 - **Later Working-V1 Acceptance Criteria**:
-  - Preferences persist in `learning_preferences` with a unique constraint on `(user_id, topic)`.
-  - Availability intervals are modeled as half-open intervals $[t_{\text{start}}, t_{\text{end}})$ with local timezone storage, preventing back-to-back booking false conflicts.
+  - Availability consists of explicit dated intervals, not recurring weekly schedules.
+  - A learner selects a local start and end date/time using their IANA timezone. The application resolves these into UTC instants. Nonexistent local times are rejected; ambiguous local times require an explicit offset choice. Stored intervals do not move when the learner changes their profile timezone.
+  - Availability uses half-open intervals `[starts_at, ends_at)`. Adjacent or overlapping slots are merged logically when checking coverage. Full availability means that their union covers the listing interval without a gap.
+  - A listing is the author’s explicit declaration of availability for that booked interval. Respondents must supply matching availability. A later availability edit affects future discovery and acceptance, but does not silently cancel an already accepted booking.
+  - Fixture V-01 defines coverage rules.
 
 ### FR-03: Topic Communities and Channels
 - **Classification**: Confirmed / P0
@@ -84,6 +88,8 @@ Every requirement defines two distinct evaluation criteria and states its milest
   - Selecting a past time or duration $>180\text{ min}$ displays an immediate validation error.
 - **Later Working-V1 Acceptance Criteria**:
   - API validates that `scheduled_start_time` is in the future (UTC) and `duration_minutes` is between 15 and 180.
+  - Listing tags must be nonempty.
+  - `study_listings.author_level` records the author's self-reported knowledge level for that listing; `target_level` is removed from V1. Changing author profile level later does not alter stored listing level.
   - Listing persists with status `open`. Creating a listing with times overlapping the author's own active/scheduled sessions is rejected with HTTP 409 Conflict.
 
 ### FR-07: Search, Discovery, and Compatibility Ranking
@@ -91,12 +97,15 @@ Every requirement defines two distinct evaluation criteria and states its milest
 - **Summary**: Channel members can browse open listings, toggle between chronological and compatibility-ranked ordering, and view transparent score justifications.
 - **Immediate Prototype Acceptance Criteria**:
   - Discovery view provides a toggle: "Sort by Compatibility" vs. "Sort by Newest".
-  - Both sort modes apply the exact same hard eligibility filters (language, availability, no blocks).
-  - Compatibility mode displays scores out of 100 with 1 decimal place (e.g., `67.5 / 100`) and a decomposed explanation badge (e.g., *"Overlapping topic tags, shared study goal, adjacent knowledge level"*).
+  - Both sort modes apply the exact same candidate eligibility filters (language, availability, no blocks). If language or availability is missing, strict eligibility cannot be established; prompt for those inputs and offer explicitly labeled broader browsing. Never silently relax eligibility.
+  - Strict chronological order is `created_at DESC, id ASC`.
+  - Compatibility order is unrounded score descending, then scheduled start ascending, then ID ascending. Rounding affects display only.
+  - Compatibility mode displays scores out of 100 with 1 decimal place (e.g., `60.8 / 100`) and a decomposed explanation badge.
   - Missing learner preferences display an inline prompt to complete preferences, falling back gracefully to chronological ordering with no invented score.
 - **Later Working-V1 Acceptance Criteria**:
-  - `GET /api/v1/channels/:id/listings?sort=compatibility` executes deterministic ranking using pure scoring functions ($0.40T + 0.35G + 0.25L$).
+  - Ranking reads the viewer’s saved topic-specific tags, level, and goal, together with the listing’s tags, author level, and goal. Missing scoring inputs disable scoring; no substitute values are invented.
   - Complies with performance target NFR-05 (p95 $< 1000\text{ ms}$ for 1,000 listings).
+  - Fixture M-01 defines ranking calculation and chronological fallback.
 
 ### FR-08: Responses to Study Listings
 - **Classification**: Confirmed / P0 *(Self-response rejection and withdrawal/re-response: Proposed)*
@@ -107,8 +116,10 @@ Every requirement defines two distinct evaluation criteria and states its milest
   - Listing author cannot respond to their own listing (action disabled).
   - Respondent can click "Withdraw Response", restoring the listing to unresponded state. If still open, respondent can re-respond.
 - **Later Working-V1 Acceptance Criteria**:
-  - `POST /api/v1/listings/:id/responses` enforces unique active constraint `(listing_id, respondent_id)` where `status = 'pending'`.
+  - Retain permanent `UNIQUE(listing_id, respondent_id)`. Re-response reuses the existing row: `withdrawn → pending`. Do not introduce a pending-only unique constraint or insert another attempt row.
+  - `pending → withdrawn`, `pending → accepted`, and `pending → declined` are the supported transitions. Accepted and declined responses cannot be reactivated. All transitions follow architecture §4.1’s locking and eligibility rules.
   - Self-responses return HTTP 400 Bad Request (`CANNOT_RESPOND_TO_OWN_LISTING`).
+  - Fixture R-01 defines re-response reuse behavior.
 
 ### FR-09: Single Partner Acceptance Workflow
 - **Classification**: Confirmed / P0
@@ -118,9 +129,7 @@ Every requirement defines two distinct evaluation criteria and states its milest
   - Listing updates to "Matched", a scheduled session card appears for both participants, and other candidate responses show "Closed / Not Selected".
   - Attempting to accept a second respondent is prevented.
 - **Later Working-V1 Acceptance Criteria**:
-  - Database transaction executes acceptance with row-level locking (`SELECT FOR UPDATE` on listing).
-  - Transaction atomically re-verifies: channel membership, absence of active blocks, pending state of response, future start time, and **schedule availability for BOTH participants across all listings**.
-  - Two simultaneous acceptance attempts cannot create two partnerships; exactly one succeeds and the other receives HTTP 409 Conflict.
+  - Acceptance follows the participant-locking protocol in architecture §4.1. Same-listing races create at most one session; different-listing races cannot create overlapping bookings for a shared learner. Eligibility is rechecked after acquiring locks. Fixtures C-01–C-04 define the required observable outcomes. Prototype prevention of a second click does not demonstrate database concurrency safety.
 
 ### FR-10: Synchronous Session Text Chat
 - **Classification**: Confirmed / P0
@@ -136,41 +145,54 @@ Every requirement defines two distinct evaluation criteria and states its milest
   - Messages persist in `session_messages` with authoritative server timestamps.
 
 ### FR-11: Daily Study Allowance Accounting
-- **Classification**: Confirmed / P0 *(180 min allowance: Confirmed; UTC reset: Proposed)*
-- **Summary**: Each free learner has a confirmed daily study allowance of 180 minutes. Active session time decrements the remaining allowance in real time.
+- **Classification**: Confirmed / P0 *(180 min allowance: Confirmed; UTC reset, integer seconds, exact-midnight policy: Proposed)*
+- **Summary**: Each free learner has a confirmed daily study allowance of 180 minutes (10,800 integer seconds). Active session time decrements the remaining allowance in integer seconds.
 - **Immediate Prototype Acceptance Criteria**:
-  - Header displays "Remaining Daily Allowance: 180 min".
-  - Active session increments elapsed timer and decrements allowance indicator.
-  - When remaining allowance reaches 0, session ends automatically with an "Allowance Exhausted" modal, disabling further chat.
+  - Header displays "Remaining Daily Allowance: 180 min" (10,800 s).
+  - Active session increments elapsed timer and decrements allowance indicator in integer seconds.
+  - When remaining allowance reaches 0, session ends automatically with an "Allowance Exhausted" modal, setting terminal reason `allowance_exhaustion` and disabling further chat.
 - **Later Working-V1 Acceptance Criteria**:
-  - Server maintains `usage_ledgers` recording counted minutes apportioned by UTC date (`00:00–24:00 UTC`).
-  - Active sessions are terminated server-side when either participant reaches 0 remaining allowance.
-  - Sessions spanning across 00:00 UTC split counted minutes into respective UTC days atomically.
+  - The daily allowance is represented as **10,800 integer seconds**.
+  - Authoritative accounting timestamps use whole-second resolution.
+  - A session’s charged interval is `[actual_start_time, effective_end_time)`.
+  - No rounding upward is applied to sessions or daily segments. Minutes are a display conversion only; the authoritative ledger stores seconds.
+  - Both participants receive identical session-duration charges.
+  - Exact-midnight policy (exhaustion first): if either learner exhausts their old-day allowance exactly at midnight, the session ends at midnight (`allowance_exhaustion`). The new day’s allowance does not revive or restart the session. If both learners have positive allowance remaining, the session continues into Day 2.
+  - Day-boundary splitting calculates `[actual_start_time, effective_end_time) ∩ [day_start, next_day_start)` in integer seconds. Positive ledger rows are inserted at finalization only (`UNIQUE(session_id, user_id, utc_date)`).
+  - Fixtures A-01–A-07 define observable accounting outcomes.
 
-### FR-12: Session Outcome Confirmation
-- **Classification**: Confirmed / P0 *(Dual-approval versioned locking: Proposed)*
-- **Summary**: Participants record covered topics and learning notes. Topics become mutually confirmed outcomes only when both partners approve the identical version.
+### FR-12: Session outcomes and proposed mutual confirmation
+- **Classification**: Recording covered topics and session notes: **Confirmed**. Mutual confirmation and its version-safe mechanism: **Proposed**. Priority: P0 for the currently proposed V1 flow.
+- **Summary**: Participants can record shared topics and notes after an ended session. Under the proposed confirmation mechanism, an outcome is mutually confirmed only when both session participants approve its current version.
 - **Immediate Prototype Acceptance Criteria**:
-  - Post-session view displays "Session Outcomes".
-  - Partner A enters topics covered and clicks "Submit for Confirmation".
-  - Partner B sees "Confirm Partner Notes" button; clicking it marks outcome as "Mutually Confirmed".
-  - Editing notes resets confirmation status until re-approved.
+  - A fictional two-person flow demonstrates:
+    1. Submission of version 1 by Partner A.
+    2. Confirmation of version 1 by Partner B (derived mutual confirmation active).
+    3. Editing to version 2 by Partner A, invalidating prior approvals and resetting mutual confirmation.
+    4. Rejection of an attempted confirmation of version 1 with a visible 409 conflict.
+  - The interface identifies mutual confirmation as a proposed design and simulated persistence as applicable.
 - **Later Working-V1 Acceptance Criteria**:
-  - Schema stores `session_outcomes` with `version`, `topics_covered`, and `partner_confirmed_at`.
-  - Modifying outcome text increments version and nullifies partner confirmation timestamp.
-  - Session status remains terminal at `ended`; outcome status is tracked independently.
+  - There is at most one shared outcome row per session in `session_outcomes`.
+  - Either participant may create or edit it. Creating or saving an edited version constitutes the submitting participant’s approval of that exact content.
+  - Every edit increments `version` and invalidates both previous approvals, then records the editor’s approval of the new version.
+  - The other participant confirms the current version explicitly.
+  - Derived mutual confirmation is true only when: `approved_version_a = version AND approved_version_b = version`. It is not maintained as an independent Boolean.
+  - Session status remains `ended` throughout; reviews do not require outcome confirmation.
+  - Every edit or confirmation request includes `expected_version`. Stale requests return HTTP `409 OUTCOME_VERSION_CONFLICT`.
+  - Fixtures O-01–O-03 define required race behavior.
 
 ### FR-13: Partner Evaluation and Reviews
-- **Classification**: Confirmed / P0 *(1 review per participant, 5-min minimum threshold: Proposed)*
+- **Classification**: Confirmed / P0 *(1 review per participant, 300s/5-min minimum threshold: Proposed)*
 - **Summary**: Following a completed session meeting the minimum active duration, participants can submit an evaluation and review.
 - **Immediate Prototype Acceptance Criteria**:
-  - Sessions lasting $\ge 5\text{ minutes}$ display "Review Partner" form (rating 1–5 stars and text feedback).
-  - Sessions under 5 minutes show an advisory: *"Session under 5 minutes: recorded in private history without public review eligibility."*
+  - Sessions lasting $\ge 300\text{ seconds}$ ($\ge 5\text{ minutes}$) display "Review Partner" form (rating 1–5 stars and text feedback).
+  - Sessions under 300 seconds show an advisory: *"Session under 5 minutes (300 seconds): recorded in private history without public review eligibility."*
   - Submitting a review disables duplicate submissions.
 - **Later Working-V1 Acceptance Criteria**:
   - Schema enforces `UNIQUE (session_id, reviewer_id)`.
   - Server rejects review creation if `session.counted_duration_seconds < 300` or if reviewer is not a session participant.
   - For public profile aggregation, at most 1 review per reviewer-recipient pair per UTC day is counted to prevent review stuffing.
+  - Fixture S-01 defines short-session non-qualification.
 
 ### FR-14: Private Study History
 - **Classification**: Confirmed / P0
@@ -193,15 +215,18 @@ Every requirement defines two distinct evaluation criteria and states its milest
 
 ### FR-16: Blocking and Misuse Reporting
 - **Classification**: Confirmed in proposal / P0
-- **Summary**: Learners can block abusive peers and submit reports to platform moderators.
+- **Summary**: Learners can block abusive peers and submit reports to platform moderators. Blocking stops future contact, not access to existing session records.
 - **Immediate Prototype Acceptance Criteria**:
   - Partner profile and chat menu include "Block User" and "Report User" actions.
   - Blocking a user immediately cancels any scheduled session between the pair, halts active session chat, and suppresses their listings from search.
+  - Both participants retain read-only access to their shared session archive after blocking.
   - Administrator persona view displays an incoming report queue.
 - **Later Working-V1 Acceptance Criteria**:
-  - `POST /api/v1/blocks` inserts a record into `user_blocks`.
-  - Search queries join `user_blocks` to eliminate listings authored by or visible to blocked pairs.
-  - Active session blocking terminates the session with reason `manual_exit`, finalizes accrued time once, and locks chat.
+  - Blocking stops future contact, not access to a participant’s existing records.
+  - Both participants retain read-only access to their shared session archive after blocking. Other learners and friends have no access. Administrators may access relevant chat evidence only through an active moderation report filed by a participant.
+  - Blocking disables new shared-outcome edits and confirmations between the pair. Existing outcomes remain readable. Reporting remains available. Eligible post-session reviews remain governed by FR-13 and do not reopen chat.
+  - A scheduled shared session becomes `cancelled`, with no charge. An active shared session ends using reason `blocked`, subject to any earlier effective termination boundary. Its accrued usage is finalized once.
+  - Fixture P-01 defines blocking permissions and terminal state.
 
 ### FR-17: Session Timing, Early-Start Guard & Cancellation
 - **Classification**: Confirmed start/end / Proposed 60s grace & late-start rules / P0
@@ -245,7 +270,7 @@ Every requirement defines two distinct evaluation criteria and states its milest
 | ID | Requirement | Category | Target / Specification | Observable Verification Check (Pass/Fail) | Milestone Applicability |
 | :-: | :--- | :--- | :--- | :--- | :--- |
 | **NFR-01** | **Authorization & Data Privacy** | Security | RBAC and ReBAC enforcing owner privacy on history, private notes, and messages. | **Pass**: Automated integration tests assert HTTP 403 when User A queries User B's `/sessions`, `/responses`, or session chat room. | Later Working-V1 (Not proven by prototype persona mocks) |
-| **NFR-02** | **Data Integrity & Concurrency** | Integrity | Concurrency controls prevent double-booking, race conditions in partner acceptance, and duplicate session finalization. | **Pass**: Simulating 10 concurrent acceptances on 1 listing creates exactly 1 session; repeated finalize requests commit exactly 1 ledger record. | Later Working-V1 (Requires PostgreSQL row locks) |
+| **NFR-02** | **Data Integrity & Concurrency** | Integrity | Concurrency controls prevent double-booking, cross-listing schedule collisions, and duplicate session finalization. | **Pass**: Same-listing and cross-listing acceptance races satisfy C-01–C-04. Repeated finalization creates exactly one ledger row per participant per positively charged UTC date, with unchanged values on retry. Fixtures A-01–A-07 are specification expectations until executable tests exist. | Later Working-V1 (Requires PostgreSQL row locks) |
 | **NFR-03** | **Responsive Viewport Support** | Usability | Responsive layout supporting mobile ($360\text{ px}$) and desktop ($1280\text{ px}$) viewports without horizontal scrolling. | **Pass**: Playwright/Cypress viewport tests verify 0 horizontal scroll overflow on core journey pages at 360px and 1280px widths. | Immediate Prototype & Working-V1 |
 | **NFR-04** | **Usability & Accessibility** | Accessibility | Keyboard navigability, visible focus rings, explicit form labels, and distinguishable error messages. | **Pass**: Complete core journey operable via keyboard navigation alone (Tab, Shift+Tab, Enter, Space); automated Axe/Lighthouse accessibility score $\ge 90$. | Immediate Prototype & Working-V1 |
 | **NFR-05** | **Discovery Performance** | Performance | Listing discovery API response latency p95 under $1,000\text{ ms}$ with $1,000$ open listings and $10$ concurrent clients. | **Pass**: K6 / Autocannon benchmark against `/api/v1/channels/:id/listings?sort=compatibility` achieves p95 $< 1000\text{ ms}$ on reference test environment. | Later Working-V1 |
@@ -258,30 +283,43 @@ Every requirement defines two distinct evaluation criteria and states its milest
 
 > *Notice: These fixtures define the precise mathematical, temporal, and access boundaries required by this specification. They serve as formal specification benchmarks until executable automated test suites are implemented in Batch 7.*
 
-### Fixture TF-01: Late Start Duration Cap (FR-17)
-- **Input**: Listing booked for 14:00 to 15:00 UTC (duration: 60 minutes).
-- **Execution**: Both participants connect and confirm start at 14:08 UTC.
-- **Expected Outcome**: Session auto-terminates at 15:00 UTC. `counted_duration_seconds` is exactly $3,120\text{ s}$ ($52\text{ minutes}$). Neither user receives credit for the 8 minutes elapsed prior to actual start.
+### 4.1 Acceptance Concurrency Fixtures (FR-09, NFR-02)
 
-### Fixture TF-02: Cross-Midnight Usage & Precedence (FR-11)
-- **Input**: Session booked for 23:45 UTC (Day 1) to 00:30 UTC (Day 2) (duration: 45 minutes).
-- **Case A (Sufficient Allowance)**: Both users have 60 min remaining on Day 1.
-  - *Expected Outcome*: Day 1 ledger charged 15 minutes; Day 2 ledger charged 30 minutes from replenished 180 min allowance.
-- **Case B (Exhaustion Precedence)**: User A has only 10 min remaining on Day 1.
-  - *Expected Outcome*: Session terminates at 23:55 UTC (`end_reason = 'allowance_exhaustion'`). Day 1 charged 10 minutes. Day 2 charged 0 minutes (session never reaches 00:00 UTC).
+| ID | Scenario | Expected result |
+| --- | --- | --- |
+| **C-01: Cross-listing race** | A accepts P on listing X, 14:00–15:00. Simultaneously B accepts P on listing Y, 14:30–15:30. | Both transactions require P’s user-row lock. One commits; the other subsequently detects the committed overlap and returns `409 SCHEDULE_CONFLICT`. Exactly one booking exists. |
+| **C-02: Back-to-back bookings** | Same participants are booked 14:00–15:00 and 15:00–16:00. | No overlap solely from the shared endpoint. |
+| **C-03: Withdrawal race** | Author accepts while respondent withdraws. | One serial ordering applies. A response cannot finish as withdrawn while its acceptance simultaneously creates a valid session. |
+| **C-04: Block race** | Author accepts while either party blocks the other. | Acceptance either fails, or its resulting scheduled session is cancelled by the block transaction. No usable shared booking survives. |
 
-### Fixture TF-03: Concurrency & Duplicate Finalization (FR-09, FR-11, NFR-02)
-- **Input**: An active session reaches scheduled end. Both client tabs issue `POST /api/v1/sessions/:id/end` within 10 milliseconds.
-- **Expected Outcome**: Exactly one database transaction commits `status = 'ended'`. Exactly one set of `usage_ledgers` records is created. The second request returns HTTP 200 with the already finalized session payload. Zero duplicate minutes are charged.
+### 4.2 Accounting Fixtures (FR-11, NFR-02)
 
-### Fixture TF-04: Unauthorized Private Data Access (FR-01, FR-14, NFR-01)
-- **Input**: Learner B issues `GET /api/v1/users/{LearnerA_id}/sessions`.
-- **Expected Outcome**: Server returns HTTP 403 Forbidden. Learner A's private history, session partner names, and personal notes are completely excluded from the response.
+*(All remaining-allowance values refer to both learners unless stated otherwise).*
 
-### Fixture TF-05: Compatibility Arithmetic & Display Rounding (FR-07)
-- **Case 1 (Perfect Match)**: $T = 1.0, G = 1.0, L = 1.0 \implies 100 \times (0.40(1) + 0.35(1) + 0.25(1)) = 100.0$.
-  - *Expected Display*: `Compatibility Score: 100.0 / 100`.
-- **Case 2 (Partial Match)**: $T = 0.50, G = 1.0, L = 0.50 \implies 100 \times (0.40(0.5) + 0.35(1) + 0.25(0.5)) = 67.5$.
-  - *Expected Display*: `Compatibility Score: 67.5 / 100`.
-- **Case 3 (Missing Preferences)**: Viewer has not configured topic preference tags.
-  - *Expected Display*: Compatibility score suppressed; chronological fallback with inline preference prompt.
+| ID | Input | Expected outcome |
+| --- | --- | --- |
+| **A-01: Exact-midnight exhaustion** | Booked 23:45–00:30. A has exactly 900 seconds remaining on Day 1; B has 3,600. Start 23:45. | End at 00:00 with `allowance_exhaustion`. Charge 900 seconds to each participant on Day 1. No Day 2 rows. Session does not restart after reset. |
+| **A-02: Sufficient allowance across midnight** | Same booking; both have 3,600 seconds remaining on Day 1. | End 00:30. Each participant receives Day 1 charge 900 and Day 2 charge 1,800. Total 2,700 seconds. |
+| **A-03: Scheduled end at midnight** | Booked 23:45–00:00; both have 3,600 seconds remaining. | End 00:00 with `scheduled_end`; charge 900 seconds on Day 1 only. |
+| **A-04: End/exhaustion tie** | Same booking as A-03; A has exactly 900 seconds remaining. | End 00:00 with `allowance_exhaustion` under the tie rule. Same 900-second charges; no Day 2 rows. |
+| **A-05: Delayed finalization** | Start 14:00; booked end 15:00. A has 600 seconds remaining. Worker runs at 14:12:07. | Effective end 14:10, reason `allowance_exhaustion`; charge 600 seconds each, not 727. Messages at or after 14:10 are rejected. |
+| **A-06: Seconds without rounding** | Start 14:00:00; authorized manual end 14:00:31. | Charge exactly 31 seconds each. No rounding to 60 seconds. |
+| **A-07: Retry** | Finalize A-02 twice, including concurrent requests. | Four ledger rows total: two participants × two positive-day segments. Repeated calls return the same final state and charges. |
+| **S-01: Non-rounded short session** | The 31-second session in A-06. | Produces two 31-second ledger rows, a session duration of 31, and no review eligibility ($31 < 300$). Its daily charge is not rounded to one minute. |
+
+### 4.3 Version-Safe Outcome Fixtures (FR-12)
+
+| ID | Scenario | Expected result |
+| --- | --- | --- |
+| **O-01: Initial confirmation** | A submits v1. B confirms expected v1. | After submission: A=v1, B=null. After confirmation: both=v1; mutually confirmed. |
+| **O-02: Edit wins race** | B has read v1. A edits with expected v1 and creates v2. B then confirms expected v1. | B receives 409. Current content remains v2; A=v2, B=null; not mutually confirmed. |
+| **O-03: Confirmation wins race** | B confirms v1 before A’s edit transaction. A then edits using expected v1. | v1 is briefly confirmed; edit creates v2 and invalidates old approvals. Final state: A=v2, B=null. No v2 confirmation is inherited. |
+
+### 4.4 Availability, Response, Matching & Permissions Fixtures
+
+- **Fixture V-01 (Dated Availability Coverage, FR-02)**: Slots 14:00–14:30 and 14:30–15:00 cover a 14:00–15:00 listing. Slots ending 14:29 and starting 14:30 do not. A subsequent profile-timezone change leaves stored instants unchanged.
+- **Fixture R-01 (Response Row Reuse, FR-08)**: Respond, withdraw, and re-respond to an open listing. Exactly one row exists throughout; its state becomes `pending → withdrawn → pending`.
+- **Fixture M-01 (Compatibility Scoring & Missing Inputs, FR-07)**: Viewer tags `{derivatives, limits}`, listing tags `{derivatives, integrals}`, shared goal, viewer level 1, author level 2 produce $100 \times (0.40 \times (1/3) + 0.35 \times 1.0 + 0.25 \times 0.5) = 60.8 / 100$. Empty viewer tags suppress scoring. Changing the author’s profile level later does not alter the stored listing level.
+- **Fixture P-01 (Blocking and Archive Access, FR-16)**: A blocks B during an active session. Sending further messages and confirming shared outcomes fails. Both retain read-only archive access. Learner C cannot read the archive. An administrator without an applicable report cannot read it. The final reason is `blocked` unless an earlier boundary already ended the session.
+- **Fixture TF-01: Late Start Duration Cap (FR-17)**: Listing booked for 14:00 to 15:00 UTC (duration: 60 minutes). Both participants connect and confirm start at 14:08 UTC. Session auto-terminates at 15:00 UTC. `counted_duration_seconds` is exactly $3,120\text{ s}$ ($52\text{ minutes}$). Neither user receives credit for the 8 minutes elapsed prior to actual start.
+- **Fixture TF-04: Unauthorized Private Data Access (FR-01, FR-14, NFR-01)**: Learner B issues `GET /api/v1/users/{LearnerA_id}/sessions`. Server returns HTTP 403 Forbidden. Learner A's private history, session partner names, and personal notes are completely excluded from the response.

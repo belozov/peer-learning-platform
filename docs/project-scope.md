@@ -72,8 +72,8 @@ flowchart TD
 6. **Reputation & Review Bounds**:
    - Reputation is strictly computed from auditable historical facts: eligible completed session count, accounted study time, average rating with review count, and mutually confirmed topics.
    - One combined opaque "mastery" or "karma" score is avoided.
-   - **5-Minute Review Threshold (Proposed)**: Sessions must reach at least $5\text{ accounted minutes}$ to qualify for public completion badges or review submission; shorter sessions remain visible only in private history.
-   - **Mutual Outcome Confirmation (Confirmed)**: Topics covered appear as confirmed outcomes only when both participants approve identical text version.
+   - **5-Minute Review Threshold (Proposed)**: Sessions must reach at least $300\text{ accounted seconds}$ ($5\text{ minutes}$) to qualify for public completion badges or review submission; shorter sessions remain visible only in private history.
+   - **Session Outcomes & Mutual Confirmation**: Recording session outcomes is Confirmed. Requiring both participants to confirm the same outcome version is Proposed. If implemented, mutual confirmation follows FR-12’s version-safe protocol and contributes to reputation only under the separately proposed eligibility rules.
 7. **Social & Friendship Mechanics**:
    - Friendship interactions are limited to `request`, `accept`, `decline`, and `remove`.
    - Friendship modulates social presence visibility but does not grant access to another user's private session history.
@@ -125,7 +125,7 @@ To satisfy the university requirements for **Existing System Comparison** (evalu
 | **Relational Database Entities** | Specification Choice | Derived directly from requirements; not constrained to an arbitrary count. |
 | **180-Minute Daily Study Allowance** | Confirmed Requirement | Confirmed maximum daily study time per free learner across sessions. |
 | **Previous Partners Private by Default**| Confirmed Requirement | Confirmed privacy boundary; exposed only via explicit user opt-in. |
-| **Mutual Outcome Confirmation** | Confirmed Concept | Confirmed requirement; dual-approval versioned locking is Proposed. |
+| **Session Outcomes & Mutual Confirmation** | Recording Confirmed; Mutual Confirmation Proposed | Recording session outcomes is Confirmed. Requiring both participants to confirm the same outcome version is Proposed. If implemented, mutual confirmation follows FR-12’s version-safe protocol. |
 | **Matching Weights (0.40T, 0.35G, 0.25L)**| Proposed Design Rule | Working transparent starting hypothesis; subject to empirical validation during user research. |
 | **UTC Daily Reset (00:00 UTC)** | Proposed Design Rule | Engineered to eliminate timezone-manipulation abuse; user-local reset remains a candidate. |
 | **60-Second Grace Period** | Proposed Design Rule | Reconnection buffer for temporary socket drops during active sessions. |

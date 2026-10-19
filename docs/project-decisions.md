@@ -51,9 +51,9 @@ This document records the architectural, methodological, and scoping decisions f
   - Time is tracked exclusively on the server using monotonic elapsed wall-clock intervals during mutual active presence.
   - Sessions cannot start before `scheduled_start`. Scheduled end is fixed at `scheduled_start + duration`.
   - Late starts do not extend the session end; duration is bounded by actual elapsed time up to `scheduled_end`.
-  - Daily allowance is capped at **180 minutes/day** (Confirmed).
-  - Daily reset boundary is set to **00:00–24:00 UTC** (Proposed). Cross-midnight sessions split credited minutes into respective UTC days.
-  - A threshold of at least **5 accounted minutes** is required for public review eligibility or public completion indicators; shorter sessions remain visible only in private history (Proposed).
+  - Daily allowance is capped at **180 minutes/day (10,800 integer seconds)** (Confirmed).
+  - Daily reset boundary is set to **00:00–24:00 UTC** (Proposed). Cross-midnight sessions split credited integer seconds into respective UTC days. Exact-midnight allowance exhaustion terminates session at midnight before new day reset takes effect.
+  - A threshold of at least **300 accounted seconds (5 accounted minutes)** is required for public review eligibility or public completion indicators; shorter sessions remain visible only in private history (Proposed).
 - **Consequences**: Prevents duplicate time accrual across multiple tabs. Clarifies that tracked time reflects **accounted active participation**, not verified learning mastery.
 
 ---
@@ -89,3 +89,14 @@ This document records the architectural, methodological, and scoping decisions f
 - **Context**: Conducting a formal empirical study with adult volunteers requires realistic participant recruitment bounds within an academic semester.
 - **Decision**: Propose a target recruitment of 10–20 adult learner volunteers for counterbalanced task evaluations (compatibility vs. chronological ordering), while explicitly acknowledging that this target is a proposed study design rather than a university-mandated minimum.
 - **Consequences**: Enables statistical distribution analysis without overclaiming broad population-level generalizability from a convenience sample.
+
+---
+
+## DEC-009: Version-Safe Outcome Confirmation
+- **Status**: Recording Confirmed; Mutual Confirmation Protocol Proposed
+- **Context**: Learners need to document covered topics and study notes after ended sessions. However, naive single-boolean confirmation flags or non-versioned writes allow silent overwrite races when both participants edit simultaneously.
+- **Decision**:
+  - Recording post-session outcomes is Confirmed.
+  - Require both participants to approve the exact same version (`approved_version_a = version AND approved_version_b = version`) under a version-safe optimistic locking protocol (`expected_version`).
+  - Edits increment the version and invalidate previous approvals; stale write/confirmation attempts return HTTP 409 Conflict.
+- **Consequences**: Guarantees mutual agreement on reported topics without races, while explicitly clarifying that outcome confirmation reflects consensus on reported topics rather than objective proof of mastery.

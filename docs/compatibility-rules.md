@@ -44,17 +44,17 @@ flowchart TD
 3. **Self-Exclusion**: A learner cannot match with or respond to their own listing (`viewer_id != author_id`).
 4. **Safety & Blocking**: Neither learner has placed an active block on the other (`user_blocks` check).
 5. **Language Match**: The listing's designated language must be included in the viewing learner's declared spoken languages array.
-6. **Full Availability Overlap (Half-Open Intervals)**: The listing's scheduled interval must be completely enclosed within the viewing learner's declared availability. Intervals are modeled as **half-open $[t_{\text{start}}, t_{\text{end}})$**:
-   $$[t_{\text{start}}, t_{\text{start}} + \text{duration}) \subseteq \text{Availability}_{\text{viewer}}$$
-   *Half-open intervals guarantee that adjacent back-to-back sessions (e.g., 14:00–15:00 and 15:00–16:00) do not create false collision errors.*
-7. **No Schedule Collision**: Neither the listing author nor the viewer has an accepted session overlapping $[t_{\text{start}}, t_{\text{start}} + \text{duration})$.
+6. **Full Availability Overlap (Half-Open Intervals)**: The listing's scheduled interval must be completely covered by the viewing learner's declared dated availability intervals. Availability uses explicit dated half-open intervals `[starts_at, ends_at)` entered/displayed through the learner's IANA timezone:
+   $$[t_{\text{start}}, t_{\text{start}} + \text{duration}) \subseteq \bigcup \text{Availability}_{\text{viewer}}$$
+   Adjacent or overlapping availability slots are merged logically when checking coverage. Half-open intervals guarantee that adjacent back-to-back bookings (e.g., 14:00–15:00 and 15:00–16:00) do not create false collision errors (Fixture V-01).
+7. **No Schedule Collision**: Neither the listing author nor the viewer has a `scheduled` or `active` session overlapping $[t_{\text{start}}, t_{\text{start}} + \text{duration})$.
 
 ### 2.2 Controlled Evaluation Consistency Rule
 To evaluate the true effect of compatibility ranking versus chronological ordering (RQ1):
-- **Identical Eligibility Rule**: In empirical testing, both the **Chronological (Baseline)** condition and the **Compatibility (Experimental)** condition must apply the **exact same hard eligibility filters** (Conditions 1–7 above).
+- **Identical Eligibility Rule**: Both the **Strict Chronological (Baseline)** condition and the **Compatibility (Experimental)** condition must apply the **exact same candidate eligibility filters** (Conditions 1–7 above). If language or availability is missing, strict eligibility cannot be established; prompt for those inputs and offer explicitly labeled broader browsing. Never silently relax eligibility.
 - The only independent variable between conditions is the **ordering** of eligible listings:
-  - *Chronological Condition*: Eligible listings sorted by `created_at DESC` (or `scheduled_start_time ASC`).
-  - *Compatibility Condition*: Eligible listings sorted by `Score DESC`.
+  - *Strict Chronological Condition*: Eligible listings sorted by `created_at DESC, id ASC`.
+  - *Compatibility Condition*: Eligible listings sorted by unrounded compatibility score descending (`Score DESC`), then scheduled start ascending (`scheduled_start_time ASC`), then ID ascending (`id ASC`). Rounding affects display only.
 - **Broader Browsing**: Browsing listings with relaxed language or schedule filters is a separate, user-initiated exploration mode and must not be conflated with the baseline chronological evaluation.
 
 ---
@@ -62,16 +62,16 @@ To evaluate the true effect of compatibility ranking versus chronological orderi
 ## 3. Factor Computation ($T, G, L$)
 
 ### 3.1 Required Inputs for Ranking
-Compatibility ranking requires valid input vectors from both parties:
-- **Viewer Inputs**: Selected topic preference tags ($V_{\text{topics}}$), topic-specific knowledge level ($\text{Level}_{\text{viewer}}$), and declared study goal category ($\text{Category}_{\text{viewer}}$).
-- **Listing Inputs**: Topic tags ($L_{\text{topics}} \ge 1$), author knowledge level ($\text{Level}_{\text{author}}$), and target goal category ($\text{Category}_{\text{listing}}$).
+Compatibility ranking reads the viewer’s saved topic-specific tags, level, and goal, together with the listing’s tags, author level, and goal:
+- **Viewer Inputs**: Selected topic preference tags ($V_{\text{topics}}$ from `learning_preferences.topic_tags`), topic-specific knowledge level ($\text{Level}_{\text{viewer}}$), and declared study goal category ($\text{Category}_{\text{viewer}}$).
+- **Listing Inputs**: Topic tags ($L_{\text{topics}} \ge 1$ from `study_listings.topic_tags`), author knowledge level ($\text{Level}_{\text{listing}} = \text{study_listings.author_level}$), and listing goal category ($\text{Category}_{\text{listing}}$). `target_level` is removed from V1. Changing the author's profile level later does not alter the stored listing level.
 
 #### Missing Preference Handling
-- If a viewing learner has **not configured** their topic preference tags, knowledge level, or goal category:
+- If a viewing learner has an incomplete profile (e.g. empty `topic_tags`, missing knowledge level, or missing goal category):
   - **No invented or default scores are computed** (e.g., setting $T=0.50$ is prohibited).
   - Compatibility ranking is disabled for that query.
   - The UI presents an inline advisory: *"Complete your study preferences for this topic to unlock compatibility scores."*
-  - The listing feed falls back gracefully to standard chronological ordering.
+  - The listing feed falls back gracefully to standard chronological ordering (`created_at DESC, id ASC`).
 
 ---
 
@@ -99,7 +99,7 @@ $$G = \begin{cases}
 ---
 
 ### 3.4 Level Fit ($L$)
-Topic knowledge levels are self-reported on a 3-tier scale (1: Beginner, 2: Intermediate, 3: Advanced):
+Topic knowledge levels are self-reported on a 3-tier scale (1: Beginner, 2: Intermediate, 3: Advanced). For the listing, $\text{Level}_{\text{listing}}$ is defined immutably as $\text{study_listings.author_level}$:
 $$L = \begin{cases} 
 1.0 & \text{if } |\text{Level}_{\text{viewer}} - \text{Level}_{\text{listing}}| = 0 \quad (\text{Exact match}) \\ 
 0.5 & \text{if } |\text{Level}_{\text{viewer}} - \text{Level}_{\text{listing}}| = 1 \quad (\text{Adjacent level}) \\ 
