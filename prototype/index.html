@@ -11,19 +11,27 @@
   <!-- Top Simulation Banner & Classification Indicators -->
   <header class="banner-simulation" role="banner">
     <div>
-      <strong>PROTOTYPE SIMULATION:</strong> Fictional Data & In-Memory State Machine | Student: Zhumirov Bekzat (SE-2416) | Supervisor: Aigerim Kydyrbekova
+      <strong>PROTOTYPE SIMULATION:</strong> In-Memory Client-Side State Machine | Student: Zhumirov Bekzat (SE-2416) | Supervisor: Aigerim Kydyrbekova
     </div>
     <div class="badges">
-      <span class="badge-confirmed" title="University policy confirmed by supervisor review">Confirmed: 180m Allowance</span>
-      <span class="badge-proposed" title="Proposed platform mechanics awaiting university evaluation">Proposed: UTC / 60s Grace / 300s Review / Mutual Outcome</span>
+      <span class="badge-confirmed" title="Instruction requirement">Confirmed: 180m Allowance</span>
+      <span class="badge-proposed" title="Proposed platform design awaiting university evaluation">Proposed: UTC / 60s Grace / 300s Review / Mutual Outcome</span>
     </div>
   </header>
 
-  <!-- App Header with Persona Switcher and Balance HUD -->
+  <!-- App Header with Persona Switcher, Demo Clock, and Balance HUD -->
   <div class="app-header">
     <div class="brand-section">
       <div class="brand-title">Peer Learning Platform</div>
       <span class="tag" style="background:#e0e7ff; color:#3730a3; font-weight:700;">Diploma Prototype V1</span>
+    </div>
+
+    <!-- Demo Clock Display & Controls -->
+    <div style="display:flex; align-items:center; gap:8px; background:#f8fafc; padding:4px 10px; border-radius:var(--radius-sm); border:1px solid var(--border); font-size:12px;">
+      <span style="font-weight:700; color:var(--text-muted); text-transform:uppercase;">Demo Clock:</span>
+      <span id="hud-demo-clock" style="font-family:monospace; font-weight:700; color:#0f172a;">2026-10-20 12:00 UTC</span>
+      <button class="btn btn-secondary" style="padding:2px 6px; font-size:11px;" onclick="window.PLP.advanceDemoClock(3600)">+1h</button>
+      <button class="btn btn-secondary" style="padding:2px 6px; font-size:11px;" onclick="window.PLP.advanceDemoClock(86400)">+1d</button>
     </div>
 
     <div class="persona-switcher">
@@ -43,23 +51,22 @@
         <span style="font-size:11px; text-transform:uppercase;">Daily Cap:</span>
         <span id="hud-user-allowance">--</span>
       </div>
-      <span id="hud-user-role" class="tag" style="background:#f1f5f9; color:#475569; font-weight:700;">LEARNER</span>
     </div>
   </div>
 
   <!-- Main Navigation Tabs -->
   <nav class="main-nav" role="navigation" aria-label="Main Navigation">
     <button class="nav-tab active" data-tab="tab-feed">
-      Find a Partner & Listings <span class="nav-counter" id="nav-count-listings">3</span>
+      Find a Partner & Listings
     </button>
     <button class="nav-tab" data-tab="tab-session">
-      Study Session & HUD <span class="nav-counter" id="nav-count-sessions">Live</span>
+      Study Session & HUD
     </button>
     <button class="nav-tab" data-tab="tab-profile">
       Profile & Partner History
     </button>
     <button class="nav-tab" data-tab="tab-audit">
-      Audit Log & Invariants Checklist
+      Audit Log & Invariants Verification
     </button>
   </nav>
 
@@ -74,10 +81,11 @@
         <span class="active">Channel Feed</span>
       </div>
 
+      <!-- Channel & Membership Bar (Priority 1) -->
       <div class="channel-bar">
         <div class="channel-selector-group">
           <label for="community-select">Community:</label>
-          <select id="community-select" disabled>
+          <select id="community-select">
             <option value="comm-se">Software Engineering (SE-2416)</option>
             <option value="comm-ds">Data Science (DS-2410)</option>
           </select>
@@ -93,11 +101,18 @@
           </select>
         </div>
 
+        <!-- Channel Membership Status & Join/Leave Action -->
+        <div class="channel-selector-group" style="margin-left: 8px;">
+          <span id="channel-member-badge" class="tag">Checking...</span>
+          <button id="channel-join-leave-btn" class="btn btn-secondary" style="padding:4px 10px; font-size:12px;">Join</button>
+        </div>
+
         <div style="margin-left: auto;">
           <button class="btn btn-primary" onclick="window.PLP.openCreateModal()">+ Create Study Listing</button>
         </div>
       </div>
 
+      <!-- Sorting & Eligibility Controls -->
       <div class="feed-controls">
         <div class="sort-toggle-group">
           <span style="font-size:13px; font-weight:600; color:var(--text-muted);">Sort Order:</span>
@@ -110,7 +125,7 @@
         </div>
 
         <div class="eligibility-note">
-          <span style="color:var(--success); font-weight:700;">✓ Invariant #11:</span> Both sort views use identical eligibility filters (channel, open status, future date, no blocking, no schedule collisions).
+          <span style="color:var(--success); font-weight:700;">✓ Invariant #11:</span> Both sort views use identical eligibility filters (channel membership, open status, future date, language, no blocking, no collisions).
         </div>
       </div>
 
@@ -133,45 +148,45 @@
       </div>
     </section>
 
-    <!-- VIEW 4: AUDIT LOG & 20 INVARIANTS CHECKLIST -->
+    <!-- VIEW 4: AUDIT LOG & ACCURATE INVARIANTS STATUS -->
     <section id="tab-audit" class="view-panel" aria-label="Audit Log and Invariants">
       <div class="section-header">
         <div>
-          <h2>System Audit Log & Invariants Verification</h2>
+          <h2>System Audit Log & Invariants Verification Status</h2>
           <p style="font-size:13px; color:var(--text-muted);">
-            Real-time verification of Astra Correction Package 2 invariants and specification fixtures.
+            Accurate verification coverage of the 20 Consolidated Invariants for this client-side prototype.
           </p>
         </div>
       </div>
 
       <div style="display:flex; flex-direction:column; gap:20px;">
-        <!-- Invariants Checklist -->
+        <!-- Invariants Checklist with Honest Statuses (Priority 4) -->
         <div style="background:white; border:1px solid var(--border); border-radius:var(--radius-lg); padding:20px;">
-          <h3 style="font-size:16px; margin-bottom:6px;">Astra 20 Consolidated Invariants Compliance Status</h3>
+          <h3 style="font-size:16px; margin-bottom:6px;">Astra 20 Consolidated Invariants Implementation Coverage</h3>
           <p style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">
-            All architectural and specification rules verified in this runnable prototype:
+            Explicit distinction between demonstrated prototype features, simulated scenarios, and working-V1 backend requirements:
           </p>
           <div class="invariants-checklist">
-            <div class="invariant-item"><span class="inv-check">✓</span> 1. Status & Evidence (180m Confirmed, UTC/Grace/Mutual Proposed)</div>
-            <div class="invariant-item"><span class="inv-check">✓</span> 2. Specification Benchmarks (C-01..04, A-01..07, O-01..03, S-01)</div>
-            <div class="invariant-item"><span class="inv-check">✓</span> 3. Lock Ordering (users asc UUID → listings → responses → sessions → outcomes)</div>
-            <div class="invariant-item"><span class="inv-check">✓</span> 4. Cross-Listing Collisions (409 SCHEDULE_CONFLICT under lock)</div>
-            <div class="invariant-item"><span class="inv-check">✓</span> 5. Derived Acceptance (recheck eligibility under lock)</div>
-            <div class="invariant-item"><span class="inv-check">✓</span> 6. Booking Uniqueness (UNIQUE(listing_id), user_a != user_b)</div>
-            <div class="invariant-item"><span class="inv-check">✓</span> 7. Interval Semantics (half-open [start, end), back-to-back allowed)</div>
-            <div class="invariant-item"><span class="inv-check">✓</span> 8. Response Row Reuse (UNIQUE(listing_id, respondent_id), withdrawn → pending)</div>
-            <div class="invariant-item"><span class="inv-check">✓</span> 9. Explicit Dated Availability ([starts_at, ends_at) TIMESTAMPTZ)</div>
-            <div class="invariant-item"><span class="inv-check">✓</span> 10. Matching Preference Inputs (author_level only, no invented scores)</div>
-            <div class="invariant-item"><span class="inv-check">✓</span> 11. Identical Eligibility Filters (chronological & ranked)</div>
-            <div class="invariant-item"><span class="inv-check">✓</span> 12. Authoritative Time Representation (integer seconds, 10,800s cap)</div>
-            <div class="invariant-item"><span class="inv-check">✓</span> 13. Deterministic Termination Priority (blocked > allowance > scheduled > connection > manual)</div>
-            <div class="invariant-item"><span class="inv-check">✓</span> 14. Midnight Exhaustion Policy (exact midnight termination, no revival)</div>
-            <div class="invariant-item"><span class="inv-check">✓</span> 15. Atomic Ledger Finalization (UNIQUE(session_id, user_id, utc_date))</div>
-            <div class="invariant-item"><span class="inv-check">✓</span> 16. Post-Session Review Decoupling (≥300s threshold, independent of outcome)</div>
-            <div class="invariant-item"><span class="inv-check">✓</span> 17. Outcome Mutual Confirmation (version-safe, 409 conflict on stale write)</div>
-            <div class="invariant-item"><span class="inv-check">✓</span> 18. Blocking Propagation (active session ends with 'blocked', read-only archive)</div>
-            <div class="invariant-item"><span class="inv-check">✓</span> 19. Exact Five Terminal Reasons (manual_exit, scheduled_end, allowance_exhaustion, connection_interruption, blocked)</div>
-            <div class="invariant-item"><span class="inv-check">✓</span> 20. Diagram & Document Parity (matched states and identifiers)</div>
+            <div class="invariant-item"><span class="inv-badge demo">Demonstrated</span> 1. Status & Evidence (180m Confirmed; UTC/Grace/Mutual Proposed)</div>
+            <div class="invariant-item"><span class="inv-badge demo">Demonstrated</span> 2. Formal Specification Benchmarks (C-01..04, A-01..07, O-01..03, S-01)</div>
+            <div class="invariant-item"><span class="inv-badge sim">Simulation only</span> 3. Lock Ordering (simulated UUID sort; real PostgreSQL locks in V1)</div>
+            <div class="invariant-item"><span class="inv-badge sim">Simulation only</span> 4. Cross-Listing Collisions (409 conflict simulated in-memory)</div>
+            <div class="invariant-item"><span class="inv-badge demo">Demonstrated</span> 5. Derived Acceptance (recheck eligibility; respondent from record)</div>
+            <div class="invariant-item"><span class="inv-badge demo">Demonstrated</span> 6. Booking Uniqueness (UNIQUE(listing_id), user_a != user_b)</div>
+            <div class="invariant-item"><span class="inv-badge demo">Demonstrated</span> 7. Interval Semantics (half-open [start, end), back-to-back allowed)</div>
+            <div class="invariant-item"><span class="inv-badge demo">Demonstrated</span> 8. Response Row Reuse (UNIQUE(listing_id, respondent_id), withdrawn → pending)</div>
+            <div class="invariant-item"><span class="inv-badge demo">Demonstrated</span> 9. Explicit Dated Availability ([starts_at, ends_at) TIMESTAMPTZ)</div>
+            <div class="invariant-item"><span class="inv-badge demo">Demonstrated</span> 10. Matching Preference Inputs (author_level only, no invented scores)</div>
+            <div class="invariant-item"><span class="inv-badge demo">Demonstrated</span> 11. Identical Eligibility Filters (chronological & ranked)</div>
+            <div class="invariant-item"><span class="inv-badge demo">Demonstrated</span> 12. Authoritative Time Representation (integer seconds, 10,800s cap)</div>
+            <div class="invariant-item"><span class="inv-badge demo">Demonstrated</span> 13. Deterministic Termination Priority (blocked > allowance > scheduled > grace > manual)</div>
+            <div class="invariant-item"><span class="inv-badge demo">Demonstrated</span> 14. Midnight Exhaustion Policy (exact midnight termination, no revival)</div>
+            <div class="invariant-item"><span class="inv-badge demo">Demonstrated</span> 15. Atomic Ledger Finalization (UNIQUE(session_id, user_id, utc_date))</div>
+            <div class="invariant-item"><span class="inv-badge demo">Demonstrated</span> 16. Post-Session Review Decoupling (>= 300s threshold, independent of outcome)</div>
+            <div class="invariant-item"><span class="inv-badge demo">Demonstrated</span> 17. Outcome Mutual Confirmation (version-safe, 409 conflict on stale write)</div>
+            <div class="invariant-item"><span class="inv-badge demo">Demonstrated</span> 18. Blocking Propagation (active session ends with 'blocked', read-only archive)</div>
+            <div class="invariant-item"><span class="inv-badge demo">Demonstrated</span> 19. Exact Five Terminal Reasons (manual_exit, scheduled_end, allowance_exhaustion, connection_interruption, blocked)</div>
+            <div class="invariant-item"><span class="inv-badge v1">Working-V1</span> 20. Durable Server Persistence & Real WebSockets / WebRTC Networking</div>
           </div>
         </div>
 
@@ -187,7 +202,7 @@
 
   </main>
 
-  <!-- MODAL: CREATE STUDY LISTING -->
+  <!-- MODAL: CREATE STUDY LISTING (PRIORITY 1 VALIDATION) -->
   <div id="modal-create-listing" class="modal-overlay" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="modal-create-title">
     <div class="modal-content">
       <div class="modal-header">
@@ -196,14 +211,34 @@
       </div>
       <div class="modal-body">
         <div class="form-group">
-          <label for="new-listing-title">Listing Title:</label>
+          <label for="new-listing-title">Listing Title *:</label>
           <input type="text" id="new-listing-title" placeholder="e.g. Graph Traversal: Dijkstra Algorithm Pair Programming">
         </div>
 
         <div class="form-group">
-          <label for="new-listing-tags">Topic Tags (comma-separated):</label>
+          <label for="new-listing-tags">Topic Tags (comma-separated) *:</label>
           <input type="text" id="new-listing-tags" placeholder="algorithms, graphs, python">
           <span class="form-hint">Stored as Postgres TEXT[]. At least one tag required.</span>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <div class="form-group">
+            <label for="new-listing-level">Your Knowledge Level *:</label>
+            <select id="new-listing-level">
+              <option value="beginner">Beginner</option>
+              <option value="intermediate" selected>Intermediate</option>
+              <option value="advanced">Advanced</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="new-listing-lang">Communication Language *:</label>
+            <select id="new-listing-lang">
+              <option value="en" selected>English (en)</option>
+              <option value="ru">Russian (ru)</option>
+              <option value="kk">Kazakh (kk)</option>
+            </select>
+          </div>
         </div>
 
         <div class="form-group">
@@ -218,15 +253,15 @@
 
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
           <div class="form-group">
-            <label for="new-listing-start">Scheduled Start (Local):</label>
+            <label for="new-listing-start">Scheduled Start (Local) *:</label>
             <input type="datetime-local" id="new-listing-start" value="2026-10-25T14:00">
           </div>
           <div class="form-group">
-            <label for="new-listing-end">Scheduled End (Local):</label>
+            <label for="new-listing-end">Scheduled End (Local) *:</label>
             <input type="datetime-local" id="new-listing-end" value="2026-10-25T15:00">
           </div>
         </div>
-        <span class="form-hint">Stored as UTC TIMESTAMPTZ interval [starts_at, ends_at). Back-to-back allowed.</span>
+        <span class="form-hint">Must be future start relative to demo clock. Duration must be 15 to 180 minutes.</span>
 
         <div class="form-group">
           <label for="new-listing-notes">Study Notes / Preparation:</label>

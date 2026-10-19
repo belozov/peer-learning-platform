@@ -31,17 +31,17 @@
 ### Batch 3: Architectural Design & Technology Evaluation
 | Task ID | Task Title | Priority | Deadline | Dependencies | Status | Expected Outcome & Acceptance Criteria | Artifact / Ref |
 | :--- | :--- | :-: | :-: | :-: | :-: | :--- | :--- |
-| **PLP-09** | System Context Diagram & Architecture Narrative | P0 | 2026-10-19 | PLP-05, PLP-08 | In Progress | System boundaries, actors, contextual roles, exclusions (no external video/payment dependencies). Mermaid source + SVG export. | `docs/architecture.md`, `diagrams/src/system-context.mmd`, `diagrams/exports/system-context.svg` |
-| **PLP-10** | Use Case Diagram & Actor Matrix | P0 | 2026-10-19 | PLP-05, PLP-07 | In Progress | UML Use Case diagram mapping visitor, learner, contextual roles, and admin actions. Mermaid source + SVG export. | `diagrams/src/use-case.mmd`, `diagrams/exports/use-case.svg` |
-| **PLP-11** | Component Architecture Diagram | P0 | 2026-10-20 | PLP-09, PLP-10 | In Progress | Modular monolithic diagram detailing API modules, WebSocket gateway, persistence layer, and UI components. | `diagrams/src/component.mmd`, `diagrams/exports/component.svg` |
-| **PLP-12** | Relational Data Model Specification | P0 | 2026-10-20 | PLP-05, PLP-08 | In Progress | Requirements-derived schema, foreign keys with CASCADE policies, indexing strategy, and composite constraints. | `docs/data-model.md` |
-| **PLP-13** | Technology Alternatives & Trade-Off Comparison | P0 | 2026-10-20 | PLP-09, PLP-11 | In Progress | Comparative analysis of 4 key technical decisions (Frontend, Backend, Database, Real-Time Chat) with documentation citations. | `docs/technology-comparison.md` |
+| **PLP-09** | System Context Diagram & Architecture Narrative | P0 | 2026-10-19 | PLP-05, PLP-08 | **Completed (Revised)** | System boundaries, actors, contextual roles, exclusions (no external video/payment dependencies). Mermaid source + SVG export. | `docs/architecture.md`, `diagrams/src/system-context.mmd`, `diagrams/exports/system-context.svg` |
+| **PLP-10** | Use Case Diagram & Actor Matrix | P0 | 2026-10-19 | PLP-05, PLP-07 | **Completed (Revised)** | UML Use Case diagram mapping visitor, learner, contextual roles, and admin actions. Mermaid source + SVG export. | `diagrams/src/use-case.mmd`, `diagrams/exports/use-case.svg` |
+| **PLP-11** | Component Architecture Diagram | P0 | 2026-10-20 | PLP-09, PLP-10 | **Completed (Revised)** | Modular monolithic diagram detailing API modules, WebSocket gateway, persistence layer, and UI components. Labelled Proposed Working-V1 Architecture. | `diagrams/src/component.mmd`, `diagrams/exports/component.svg` |
+| **PLP-12** | Relational Data Model Specification | P0 | 2026-10-20 | PLP-05, PLP-08 | **Completed (Revised)** | Requirements-derived schema, foreign keys with CASCADE policies, indexing strategy, and composite constraints. | `docs/data-model.md` |
+| **PLP-13** | Technology Alternatives & Trade-Off Comparison | P0 | 2026-10-20 | PLP-09, PLP-11 | **Proposed (Awaiting Supervisor Review)** | Comparative analysis of 4 key technical decisions (Frontend, Backend, Database, Real-Time Chat) with documentation citations. | `docs/technology-comparison.md` |
 
 ### Batch 4: Milestone Demonstration Prototype
 | Task ID | Task Title | Priority | Deadline | Dependencies | Status | Expected Outcome & Acceptance Criteria | Artifact / Ref |
 | :--- | :--- | :-: | :-: | :-: | :-: | :--- | :--- |
-| **PLP-14** | Interactive Prototype Core Journey | P0 | 2026-10-21 | PLP-05, PLP-09 | Pending | Runnable web prototype demonstrating 12-step flow: Community → Channel → Listing → Match Calculation → Chat → Accounting. | `prototype/*` |
-| **PLP-15** | Prototype Exception & Simulation Banners | P0 | 2026-10-22 | PLP-14 | Pending | Explicit UI warning banner identifying simulated authentication, time, and mock data; handles empty/exhausted states. | `prototype/*` |
+| **PLP-14** | Interactive Prototype Core Journey | P0 | 2026-10-21 | PLP-05, PLP-09 | **Completed (Client-Side Prototype)** | Runnable web prototype demonstrating full journey: Community → Channel Membership → Listing → Match Calculation (`Score: 80.0 / 100`) → Scheduled Session → Active Chat → Outcome → Review → Profile. Tested via `npm test` (13/13 passed). | `prototype/*` |
+| **PLP-15** | Prototype Exception & Simulation Banners | P0 | 2026-10-22 | PLP-14 | **Completed** | Explicit UI warning banner identifying simulated in-memory state; deterministic demo clock reconciler (Fixtures A-01..A-04, A-06, S-01); outsider privacy guards. | `prototype/*` |
 
 ### Batch 5: Research Evidence, Literature & Verification Plan
 | Task ID | Task Title | Priority | Deadline | Dependencies | Status | Expected Outcome & Acceptance Criteria | Artifact / Ref |

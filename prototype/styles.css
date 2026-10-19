@@ -1049,3 +1049,24 @@ body {
   color: var(--success);
   font-weight: 700;
 }
+
+.inv-badge {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+}
+.inv-badge.demo {
+  background: var(--success-light);
+  color: var(--success);
+}
+.inv-badge.sim {
+  background: #fef3c7;
+  color: #b45309;
+}
+.inv-badge.v1 {
+  background: #f1f5f9;
+  color: #475569;
+}

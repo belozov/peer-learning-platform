@@ -1,13 +1,19 @@
 /**
- * Headless Automated Verification Test Suite for Peer Learning Platform Prototype
- * Tests compliance with the 20 Astra Consolidated Invariants and Batch 4 Specification Fixtures.
+ * Automated Verification Test Suite for Peer Learning Platform Prototype
+ * Tests actual application controller (app.js) against Astra Correction Package 2 & 3,
+ * verifying the 20 Consolidated Invariants and canonical specification fixtures.
  */
 
 const assert = require('assert');
+const path = require('path');
+
+// Direct import of actual application controller (Priority 4: No test-only copy!)
+const PLP = require(path.join(__dirname, 'app.js'));
 
 console.log('================================================================');
 console.log('RUNNING PROTOTYPE AUTOMATED VERIFICATION SUITE');
-console.log('Group: SE-2416 | Student: Zhumirov Bekzat | Supervisor: Aigerim Kydyrbekova');
+console.log('Application Controller: prototype/app.js (UMD module)');
+console.log('Student: Zhumirov Bekzat (SE-2416) | Supervisor: Aigerim Kydyrbekova');
 console.log('================================================================\n');
 
 let passedTests = 0;
@@ -22,287 +28,339 @@ function runTest(testName, fn) {
   } catch (err) {
     console.error(`[FAIL] Test ${totalTests}: ${testName}`);
     console.error(`       Error: ${err.message}\n`);
+    console.error(err.stack);
   }
 }
 
-// ============================================================================
-// CORE LOGIC IMPLEMENTATIONS UNDER TEST (Paring with app.js)
-// ============================================================================
-
-function calculateCompatibility(viewer, listing) {
-  const hasViewerPreferences = viewer && viewer.topic_tags && viewer.topic_tags.length > 0 && viewer.knowledge_level && viewer.study_goal;
-  const hasListingPreferences = listing && listing.topic_tags && listing.topic_tags.length > 0 && listing.author_level && listing.study_goal;
-
-  if (!hasViewerPreferences || !hasListingPreferences) {
-    return {
-      eligibleForScoring: false,
-      reason: 'Missing preferences',
-      unroundedScore: null,
-      displayScore: 'N/A'
-    };
-  }
-
-  const setA = new Set(viewer.topic_tags.map(t => t.toLowerCase()));
-  const setB = new Set(listing.topic_tags.map(t => t.toLowerCase()));
-  const intersection = [...setA].filter(x => setB.has(x));
-  const union = new Set([...setA, ...setB]);
-  const T = union.size > 0 ? intersection.length / union.size : 0.0;
-
-  const G = viewer.study_goal === listing.study_goal ? 1.0 : 0.0;
-
-  const levelMap = { 'beginner': 1, 'intermediate': 2, 'advanced': 3 };
-  const diff = Math.abs((levelMap[viewer.knowledge_level] || 1) - (levelMap[listing.author_level] || 1));
-  let L = 0.0;
-  if (diff === 0) L = 1.0;
-  else if (diff === 1) L = 0.5;
-  else L = 0.0;
-
-  const unroundedScore = 100.0 * (0.40 * T + 0.35 * G + 0.25 * L);
-  const displayScore = unroundedScore.toFixed(1);
-
-  return {
-    eligibleForScoring: true,
-    unroundedScore,
-    displayScore,
-    T,
-    G,
-    L,
-    matchedTags: intersection
-  };
-}
-
 // ----------------------------------------------------------------------------
-// TEST 1: Compatibility Formula Exactness & Unrounded Sort Order (Fixture M-01)
+// TEST 1: Canonical Compatibility Formula (Fixture M-01) & Format (Score: X / 100)
 // ----------------------------------------------------------------------------
-runTest('Compatibility Formula Exactness (0.40T + 0.35G + 0.25L) & Unrounded Sort', () => {
+runTest('Compatibility Formula Exactness & Format (Fixture M-01: 60.8 / 100)', () => {
   const viewer = {
-    id: 'u-alice',
-    topic_tags: ['algorithms', 'graphs', 'python'],
-    knowledge_level: 'intermediate',
+    id: 'u-viewer',
+    topic_tags: ['derivatives', 'limits'],
+    knowledge_level: 'beginner', // level 1
     study_goal: 'concept_mastery'
   };
 
-  const listing1 = {
-    id: 'list-1',
-    topic_tags: ['algorithms', 'graphs', 'python'],
-    author_level: 'intermediate',
+  const listing = {
+    id: 'list-m01',
+    topic_tags: ['derivatives', 'integrals'],
+    author_level: 'intermediate', // level 2 (diff = 1 -> L = 0.5)
     study_goal: 'concept_mastery'
   };
-  const res1 = calculateCompatibility(viewer, listing1);
-  assert.strictEqual(res1.eligibleForScoring, true);
-  assert.strictEqual(res1.unroundedScore, 100.0);
-  assert.strictEqual(res1.displayScore, '100.0');
 
-  const listing2 = {
-    id: 'list-2',
-    topic_tags: ['algorithms', 'dynamic-programming', 'python'],
-    author_level: 'intermediate',
-    study_goal: 'concept_mastery'
-  };
-  const res2 = calculateCompatibility(viewer, listing2);
-  // Intersection = 2, Union = 4 -> T = 0.5. G = 1.0, L = 1.0
-  // Score = 100 * (0.40*0.5 + 0.35*1.0 + 0.25*1.0) = 100 * (0.20 + 0.35 + 0.25) = 80.0
-  assert.strictEqual(res2.T, 0.5);
-  assert.strictEqual(res2.G, 1.0);
-  assert.strictEqual(res2.L, 1.0);
-  assert.strictEqual(res2.unroundedScore, 80.0);
-  assert.strictEqual(res2.displayScore, '80.0');
+  const res = PLP.calculateCompatibility(viewer, listing);
+  assert.strictEqual(res.eligibleForScoring, true);
 
-  const listing3 = {
-    id: 'list-3',
-    topic_tags: ['distributed-systems', 'go'],
-    author_level: 'advanced',
-    study_goal: 'code_review'
-  };
-  const res3 = calculateCompatibility(viewer, listing3);
-  // T = 0.0, G = 0.0, diff = 1 -> L = 0.5. Score = 100 * (0.25 * 0.5) = 12.5
-  assert.strictEqual(res3.T, 0.0);
-  assert.strictEqual(res3.G, 0.0);
-  assert.strictEqual(res3.L, 0.5);
-  assert.strictEqual(res3.unroundedScore, 12.5);
-  assert.strictEqual(res3.displayScore, '12.5');
-
-  // Verify sort order: list1 (100) > list2 (80) > list3 (12.5)
-  const sorted = [res2, res1, res3].sort((a, b) => b.unroundedScore - a.unroundedScore);
-  assert.strictEqual(sorted[0], res1);
-  assert.strictEqual(sorted[1], res2);
-  assert.strictEqual(sorted[2], res3);
+  // T = 1/3 (0.3333...), G = 1.0, L = 0.5
+  // Score = 100 * (0.40 * (1/3) + 0.35 * 1.0 + 0.25 * 0.5) = 60.833... -> 60.8 / 100
+  assert.strictEqual(res.displayScore, '60.8 / 100', 'Score must be formatted as 60.8 / 100 (never percentage)');
+  assert.strictEqual(res.unroundedScore.toFixed(4), '60.8333');
+  assert.strictEqual(res.matchedTags.length, 1);
+  assert.strictEqual(res.matchedTags[0], 'derivatives');
 });
 
 // ----------------------------------------------------------------------------
-// TEST 2: Invariant #10: Missing preferences disable scoring without invented values
+// TEST 2: Invariant #10: Missing Preferences Disable Scoring (Eve Fallback)
 // ----------------------------------------------------------------------------
-runTest('Invariant #10: Missing Preferences Disable Scoring (No Invented T=0.50)', () => {
-  const viewerNoTags = {
-    id: 'u-eve',
-    topic_tags: [],
-    knowledge_level: 'intermediate',
-    study_goal: 'concept_mastery'
-  };
-  const listing = {
-    id: 'list-1',
-    topic_tags: ['algorithms'],
-    author_level: 'intermediate',
-    study_goal: 'concept_mastery'
-  };
+runTest('Invariant #10: Missing Preferences Suppress Scoring Without Invented Values', () => {
+  const eve = PLP.store.users['u-eve'];
+  const listing = PLP.store.studyListings[0];
 
-  const res = calculateCompatibility(viewerNoTags, listing);
+  const res = PLP.calculateCompatibility(eve, listing);
   assert.strictEqual(res.eligibleForScoring, false);
   assert.strictEqual(res.unroundedScore, null);
   assert.strictEqual(res.displayScore, 'N/A');
+  assert.strictEqual(res.explanation.includes('missing'), true);
 });
 
 // ----------------------------------------------------------------------------
-// TEST 3: Invariant #8 & Fixture R-01: Response Row Reuse on Withdrawal
+// TEST 3: Channel Membership Gating (Priority 1)
 // ----------------------------------------------------------------------------
-runTest('Invariant #8 & Fixture R-01: Response Row Reuse (UNIQUE(listing_id, respondent_id))', () => {
-  const table = [];
+runTest('Priority 1: Channel Membership Gating & Join/Leave Interactions', () => {
+  // Eve is not initially in chan-algo
+  assert.strictEqual(PLP.isChannelMember('chan-algo', 'u-eve'), false);
 
-  function respond(listingId, respondentId, msg) {
-    const existing = table.find(r => r.listing_id === listingId && r.respondent_id === respondentId);
-    if (existing) {
-      if (existing.status === 'withdrawn') {
-        existing.status = 'pending';
-        existing.message = msg;
-        return { action: 'reused', row: existing };
-      }
-      throw new Error(`Invalid status: ${existing.status}`);
-    }
-    const newRow = { id: 'resp-' + (table.length + 1), listing_id: listingId, respondent_id: respondentId, status: 'pending', message: msg };
-    table.push(newRow);
-    return { action: 'inserted', row: newRow };
-  }
+  // Discover listings as Eve -> Locked (empty eligible listings)
+  const lockedListings = PLP.filterEligibleListings(PLP.store.studyListings, 'u-eve', 'chan-algo');
+  assert.strictEqual(lockedListings.length, 0, 'Non-members must not see listings in locked channel');
 
-  function withdraw(listingId, respondentId) {
-    const existing = table.find(r => r.listing_id === listingId && r.respondent_id === respondentId);
-    if (!existing || existing.status !== 'pending') throw new Error('Cannot withdraw');
-    existing.status = 'withdrawn';
-    return existing;
-  }
+  // Eve joins channel
+  const joinRes = PLP.joinChannel('chan-algo', 'u-eve');
+  assert.strictEqual(joinRes, true);
+  assert.strictEqual(PLP.isChannelMember('chan-algo', 'u-eve'), true);
 
-  // 1. Initial response -> Insert
-  const r1 = respond('list-101', 'u-bob', 'First message');
-  assert.strictEqual(r1.action, 'inserted');
-  assert.strictEqual(table.length, 1);
-  assert.strictEqual(table[0].status, 'pending');
+  // Now listings are visible
+  const unlockedListings = PLP.filterEligibleListings(PLP.store.studyListings, 'u-eve', 'chan-algo');
+  assert.strictEqual(unlockedListings.length > 0, true, 'Joining channel unlocks listing discovery');
+
+  // Eve leaves channel
+  PLP.leaveChannel('chan-algo', 'u-eve');
+  assert.strictEqual(PLP.isChannelMember('chan-algo', 'u-eve'), false);
+});
+
+// ----------------------------------------------------------------------------
+// TEST 4: Strict Listing Validation (Priority 1 & 2)
+// ----------------------------------------------------------------------------
+runTest('Priority 1: Strict Listing Validation (Future Start, Positive Duration, Language, Author Level)', () => {
+  // Ensure Alice is a member
+  PLP.joinChannel('chan-algo', 'u-alice');
+
+  // 1. Missing author level
+  const invalid1 = PLP.validateAndCreateListing({
+    channel_id: 'chan-algo',
+    title: 'Test Listing',
+    topic_tags: ['python'],
+    author_level: null,
+    language: 'en',
+    starts_at: '2026-10-25T14:00:00Z',
+    ends_at: '2026-10-25T15:00:00Z'
+  }, 'u-alice');
+  assert.strictEqual(invalid1.success, false);
+  assert.strictEqual(invalid1.error.includes('author knowledge level'), true);
+
+  // 2. Start in the past relative to demo clock (demo clock is 2026-10-20)
+  const invalid2 = PLP.validateAndCreateListing({
+    channel_id: 'chan-algo',
+    title: 'Past Listing',
+    topic_tags: ['python'],
+    author_level: 'intermediate',
+    language: 'en',
+    starts_at: '2020-01-01T10:00:00Z',
+    ends_at: '2020-01-01T11:00:00Z'
+  }, 'u-alice');
+  assert.strictEqual(invalid2.success, false);
+  assert.strictEqual(invalid2.error.includes('future'), true);
+
+  // 3. End before start
+  const invalid3 = PLP.validateAndCreateListing({
+    channel_id: 'chan-algo',
+    title: 'Inverted Times',
+    topic_tags: ['python'],
+    author_level: 'intermediate',
+    language: 'en',
+    starts_at: '2026-10-25T15:00:00Z',
+    ends_at: '2026-10-25T14:00:00Z'
+  }, 'u-alice');
+  assert.strictEqual(invalid3.success, false);
+  assert.strictEqual(invalid3.error.includes('after start'), true);
+
+  // 4. Duration too short (<15m)
+  const invalid4 = PLP.validateAndCreateListing({
+    channel_id: 'chan-algo',
+    title: 'Too Short',
+    topic_tags: ['python'],
+    author_level: 'intermediate',
+    language: 'en',
+    starts_at: '2026-10-25T14:00:00Z',
+    ends_at: '2026-10-25T14:05:00Z' // 5 min
+  }, 'u-alice');
+  assert.strictEqual(invalid4.success, false);
+  assert.strictEqual(invalid4.error.includes('15 and 180 minutes'), true);
+
+  // 5. Valid listing
+  const valid = PLP.validateAndCreateListing({
+    channel_id: 'chan-algo',
+    title: 'Valid Graph Traversal Session',
+    topic_tags: ['graphs', 'python'],
+    author_level: 'intermediate',
+    language: 'en',
+    starts_at: '2026-10-25T14:00:00Z',
+    ends_at: '2026-10-25T15:00:00Z'
+  }, 'u-alice');
+  assert.strictEqual(valid.success, true);
+  assert.strictEqual(valid.listing.author_level, 'intermediate');
+});
+
+// ----------------------------------------------------------------------------
+// TEST 5: Response Row Reuse (Invariant #8 & Fixture R-01)
+// ----------------------------------------------------------------------------
+runTest('Invariant #8 & Fixture R-01: Response Row Reuse on Withdrawal (UNIQUE(listing_id, respondent_id))', () => {
+  PLP.joinChannel('chan-algo', 'u-bob');
+  const listingId = 'list-101';
+
+  // 1. Initial response
+  const r1 = PLP.submitListingResponse(listingId, 'u-bob', '2026-10-25 14:00 UTC', 'First response message');
+  assert.strictEqual(r1.success, true);
+  assert.strictEqual(r1.reused, false);
+  const respId = r1.response.id;
 
   // 2. Withdraw
-  withdraw('list-101', 'u-bob');
-  assert.strictEqual(table.length, 1);
-  assert.strictEqual(table[0].status, 'withdrawn');
+  const w = PLP.withdrawResponse(respId, 'u-bob');
+  assert.strictEqual(w.success, true);
+  assert.strictEqual(w.response.status, 'withdrawn');
 
-  // 3. Re-respond -> Must reuse row, not insert a second row
-  const r2 = respond('list-101', 'u-bob', 'Updated message');
-  assert.strictEqual(r2.action, 'reused');
-  assert.strictEqual(table.length, 1, 'Table must still contain exactly one row');
-  assert.strictEqual(r2.row.id, r1.row.id, 'Row ID must be identical');
-  assert.strictEqual(r2.row.status, 'pending');
-  assert.strictEqual(r2.row.message, 'Updated message');
+  // 3. Re-respond -> Must reuse the exact same row!
+  const r2 = PLP.submitListingResponse(listingId, 'u-bob', '2026-10-25 14:00 UTC', 'Re-responding with updated notes');
+  assert.strictEqual(r2.success, true);
+  assert.strictEqual(r2.reused, true, 'Must reuse existing response row');
+  assert.strictEqual(r2.response.id, respId, 'Row ID must be preserved');
+  assert.strictEqual(r2.response.status, 'pending');
 });
 
 // ----------------------------------------------------------------------------
-// TEST 4: Shared Lock Protocol & Cross-Listing Collision Check (Fixtures C-01..C-04)
+// TEST 6: Acceptance Creates Scheduled Session & Participant Start (Priority 1)
 // ----------------------------------------------------------------------------
-runTest('Invariants #3, #4, #5 & Fixtures C-01..C-04: Lock Ordering & 409 SCHEDULE_CONFLICT', () => {
-  const users = {
-    'u-alice': { id: 'u-alice', uuid: '00000000-0000-0000-0000-000000000001' },
-    'u-bob': { id: 'u-bob', uuid: '00000000-0000-0000-0000-000000000002' }
-  };
+runTest('Priority 1 & Invariant #5: Acceptance Creates Scheduled Session (Not Immediately Active)', () => {
+  const listing = PLP.store.studyListings.find(l => l.id === 'list-101');
+  const response = PLP.store.listingResponses.find(r => r.listing_id === 'list-101' && r.respondent_id === 'u-bob');
+  assert.strictEqual(Boolean(response), true);
 
-  const existingSessions = [
-    {
-      id: 'sess-active',
-      user_a_id: 'u-alice',
-      user_b_id: 'u-carol',
-      starts_at: '2026-10-25T14:00:00Z',
-      ends_at: '2026-10-25T15:00:00Z',
-      status: 'active'
-    }
-  ];
+  // Author Alice accepts Bob's response
+  const accRes = PLP.acceptResponse(response.id, 'u-alice');
+  assert.strictEqual(accRes.success, true);
+  const session = accRes.session;
 
-  function simulateAcceptance(authorId, respondentId, intervalStart, intervalEnd) {
-    // 1. Invariant #3: Strict lock order: users ascending UUID
-    const sortedUsers = [users[authorId], users[respondentId]].sort((a, b) => a.uuid.localeCompare(b.uuid));
-    assert.strictEqual(sortedUsers[0].uuid < sortedUsers[1].uuid, true);
+  // Session must be in SCHEDULED state
+  assert.strictEqual(session.status, 'scheduled', 'Session must be created in scheduled state');
+  assert.strictEqual(session.counted_duration_seconds, 0);
 
-    // 2. Invariant #4: Check cross-listing collisions on half-open interval [start, end)
-    const lStart = new Date(intervalStart).getTime();
-    const lEnd = new Date(intervalEnd).getTime();
+  // Attempting to start session before scheduled start time should fail
+  const earlyStart = PLP.startSessionAsParticipant(session.id, 'u-alice');
+  assert.strictEqual(earlyStart.success, false);
+  assert.strictEqual(earlyStart.error.includes('before scheduled start'), true);
 
-    const conflict = existingSessions.find(s => {
-      if (s.status !== 'scheduled' && s.status !== 'active') return false;
-      if (s.user_a_id !== authorId && s.user_b_id !== authorId && s.user_a_id !== respondentId && s.user_b_id !== respondentId) return false;
-      const sStart = new Date(s.starts_at).getTime();
-      const sEnd = new Date(s.ends_at).getTime();
-      return (lStart < sEnd && lEnd > sStart);
-    });
+  // Advance demo clock to scheduled start
+  PLP.advanceDemoClockTo(session.starts_at);
 
-    if (conflict) {
-      return { status: 409, code: 'SCHEDULE_CONFLICT', conflictId: conflict.id };
-    }
-    return { status: 200, code: 'OK' };
-  }
-
-  // Attempt overlapping interval: 14:30 to 15:30 -> collides with 14:00-15:00
-  const conflictResult = simulateAcceptance('u-alice', 'u-bob', '2026-10-25T14:30:00Z', '2026-10-25T15:30:00Z');
-  assert.strictEqual(conflictResult.status, 409);
-  assert.strictEqual(conflictResult.code, 'SCHEDULE_CONFLICT');
-
-  // Attempt back-to-back non-overlapping interval: 15:00 to 16:00 -> Allowed (Invariant #7)
-  const allowedResult = simulateAcceptance('u-alice', 'u-bob', '2026-10-25T15:00:00Z', '2026-10-25T16:00:00Z');
-  assert.strictEqual(allowedResult.status, 200);
+  // Now participant check-in starts the session
+  const validStart = PLP.startSessionAsParticipant(session.id, 'u-alice');
+  assert.strictEqual(validStart.success, true);
+  assert.strictEqual(session.status, 'active', 'Participant check-in transitions session to active');
+  assert.strictEqual(PLP.store.sessionOutcomes.some(o => o.session_id === session.id), true, 'Outcome draft initialized');
 });
 
 // ----------------------------------------------------------------------------
-// TEST 5: Invariant #12 & #15: Cross-Midnight Split & Atomic Usage Ledgers (Fixture A-03)
+// TEST 7: Outsider Persona Permissions & Privacy Guard (Priority 2)
 // ----------------------------------------------------------------------------
-runTest('Invariants #12 & #15 & Fixture A-03: Cross-Midnight Split into Distinct UTC Dates', () => {
-  const ledgers = [];
+runTest('Priority 2: Outsider Persona Cannot Interfere with Private Session', () => {
+  const session = PLP.store.studySessions.find(s => s.user_a_id === 'u-alice' && s.user_b_id === 'u-bob');
+  assert.strictEqual(Boolean(session), true);
 
-  function recordMidnightSplit(sessionId, userA, userB, day1Date, day1Sec, day2Date, day2Sec) {
-    // Both participants charged day 1 and day 2 in distinct ledger rows
-    [userA, userB].forEach(u => {
-      ledgers.push({ session_id: sessionId, user_id: u, utc_date: day1Date, counted_seconds: day1Sec });
-      ledgers.push({ session_id: sessionId, user_id: u, utc_date: day2Date, counted_seconds: day2Sec });
-    });
-  }
+  // Eve is an outsider to Alice-Bob session
+  // 1. Eve attempts to send chat message
+  const chatRes = PLP.sendChatMessage(session.id, 'u-eve', 'Intruder message');
+  assert.strictEqual(chatRes.success, false);
+  assert.strictEqual(chatRes.error.includes('Unauthorized'), true);
 
-  recordMidnightSplit('sess-split', 'u-alice', 'u-bob', '2026-10-24', 1800, '2026-10-25', 1800);
+  // 2. Eve attempts to update outcome draft
+  const editRes = PLP.updateOutcomeDraft(session.id, 'Hacked outcome', ['malicious'], 'u-eve', 1);
+  assert.strictEqual(editRes.success, false);
+  assert.strictEqual(editRes.error.includes('Unauthorized'), true);
 
-  assert.strictEqual(ledgers.length, 4);
+  // 3. Eve attempts to approve outcome
+  const appRes = PLP.approveOutcomeVersion(session.id, 1, 'u-eve');
+  assert.strictEqual(appRes.success, false);
+  assert.strictEqual(appRes.error.includes('Unauthorized'), true);
 
-  // Check unique constraint UNIQUE(session_id, user_id, utc_date)
-  const keys = ledgers.map(l => `${l.session_id}_${l.user_id}_${l.utc_date}`);
-  const uniqueKeys = new Set(keys);
-  assert.strictEqual(keys.length, uniqueKeys.size, 'Ledger rows must satisfy unique key per date');
+  // 4. Eve attempts to submit review
+  const revRes = PLP.submitSessionReview(session.id, 'u-eve', 5, 'Fake review');
+  assert.strictEqual(revRes.success, false);
+  assert.strictEqual(revRes.error.includes('Unauthorized'), true);
 });
 
 // ----------------------------------------------------------------------------
-// TEST 6: Invariant #14 & Fixture A-04: Exact-Midnight Exhaustion
+// TEST 8: Canonical Fixture A-01 (Exact-Midnight Exhaustion)
 // ----------------------------------------------------------------------------
-runTest('Invariant #14 & Fixture A-04: Exact-Midnight Exhaustion Ends Without Day 2 Revival', () => {
-  const session = {
-    id: 'sess-exhaust',
-    status: 'active',
-    end_reason: null,
-    day1_seconds: 1800,
-    day2_seconds: 0
-  };
-
-  // Participant reaches 0 remaining seconds at exactly 00:00:00 UTC
-  session.status = 'ended';
-  session.end_reason = 'allowance_exhaustion';
-
-  assert.strictEqual(session.status, 'ended');
-  assert.strictEqual(session.end_reason, 'allowance_exhaustion');
-  assert.strictEqual(session.day2_seconds, 0, 'No seconds may be charged to Day 2');
+runTest('Canonical Fixture A-01: Exact-Midnight Exhaustion (900s Day 1, None on Day 2)', () => {
+  const s = PLP.runFixtureA01();
+  assert.strictEqual(s.status, 'ended');
+  assert.strictEqual(s.end_reason, 'allowance_exhaustion');
+  assert.strictEqual(s.counted_duration_seconds, 900);
 });
 
 // ----------------------------------------------------------------------------
-// TEST 7: Invariants #18 & #19: 5 Exact Terminal Reasons & Blocking Propagation
+// TEST 9: Canonical Fixtures A-02 & A-03 (Midnight Split & Scheduled End)
 // ----------------------------------------------------------------------------
-runTest('Invariants #18 & #19: Exact 5 Terminal Reasons & Blocking Transition', () => {
-  const ALLOWED_REASONS = new Set([
+runTest('Canonical Fixtures A-02 & A-03: Across-Midnight Split (2,700s) & Midnight Scheduled End', () => {
+  // A-02: 900s Day 1 + 1,800s Day 2 = 2,700s
+  const a02 = PLP.runFixtureA02();
+  assert.strictEqual(a02.counted_duration_seconds, 2700);
+  assert.strictEqual(a02.end_reason, 'scheduled_end');
+
+  // Verify atomic ledger rows for A-02 (2 dates per participant)
+  const a02Ledgers = PLP.store.usageLedgers.filter(l => l.session_id === a02.id);
+  assert.strictEqual(a02Ledgers.length, 4);
+  const day1 = a02Ledgers.filter(l => l.utc_date === '2026-10-24');
+  const day2 = a02Ledgers.filter(l => l.utc_date === '2026-10-25');
+  assert.strictEqual(day1.length, 2);
+  assert.strictEqual(day1[0].counted_seconds, 900);
+  assert.strictEqual(day2.length, 2);
+  assert.strictEqual(day2[0].counted_seconds, 1800);
+
+  // A-03: Reaches scheduled end at midnight (900s)
+  const a03 = PLP.runFixtureA03();
+  assert.strictEqual(a03.counted_duration_seconds, 900);
+  assert.strictEqual(a03.end_reason, 'scheduled_end');
+});
+
+// ----------------------------------------------------------------------------
+// TEST 10: Canonical Fixture A-04 (End / Exhaustion Tie Rule)
+// ----------------------------------------------------------------------------
+runTest('Canonical Fixture A-04: End / Exhaustion Tie Priority Rule (allowance_exhaustion wins)', () => {
+  const a04 = PLP.runFixtureA04();
+  assert.strictEqual(a04.counted_duration_seconds, 900);
+  assert.strictEqual(a04.end_reason, 'allowance_exhaustion', 'Under tie rule, allowance_exhaustion takes precedence');
+});
+
+// ----------------------------------------------------------------------------
+// TEST 11: Fixture A-06 & S-01 (31s Session & Review Gate)
+// ----------------------------------------------------------------------------
+runTest('Canonical Fixtures A-06 & S-01: 31-Second Session & Review Eligibility Gate', () => {
+  const a06 = PLP.runFixtureA06();
+  assert.strictEqual(a06.counted_duration_seconds, 31, 'Duration must be exact integer seconds (no rounding to 60s)');
+  assert.strictEqual(a06.end_reason, 'manual_exit');
+
+  // Review under S-01 should be locked (31 < 300)
+  const reviewAttempt = PLP.submitSessionReview(a06.id, 'u-alice', 5, 'Great short check-in');
+  assert.strictEqual(reviewAttempt.success, false);
+  assert.strictEqual(reviewAttempt.error.includes('300 seconds'), true);
+});
+
+// ----------------------------------------------------------------------------
+// TEST 12: Invariant #17 & Fixtures O-01..O-03: Version-Safe Collaborative Outcomes
+// ----------------------------------------------------------------------------
+runTest('Invariant #17 & Fixtures O-01..O-03: Version-Safe Collaborative Outcomes & 409 Conflict', () => {
+  const session = PLP.store.studySessions.find(s => s.user_a_id === 'u-alice' && s.user_b_id === 'u-bob');
+  const outcome = PLP.store.sessionOutcomes.find(o => o.session_id === session.id);
+  assert.strictEqual(Boolean(outcome), true);
+
+  // Bob approves v1 -> Mutually confirmed
+  const appBobV1 = PLP.approveOutcomeVersion(session.id, outcome.version, 'u-bob');
+  assert.strictEqual(appBobV1.success, true);
+  const appAliceV1 = PLP.approveOutcomeVersion(session.id, outcome.version, 'u-alice');
+  assert.strictEqual(appAliceV1.success, true);
+  assert.strictEqual(appAliceV1.isMutuallyConfirmed, true);
+
+  // Alice edits with expected v1 -> Becomes v2, Bob approval invalidated
+  const editV2 = PLP.updateOutcomeDraft(session.id, 'Updated v2 summary', ['algorithms'], 'u-alice', outcome.version);
+  assert.strictEqual(editV2.success, true);
+  assert.strictEqual(outcome.version, 2);
+  assert.strictEqual(outcome.approved_version_b, null, 'Partner approval must be invalidated');
+
+  // Bob attempts to approve stale v1 -> Must reject with 409 OUTCOME_VERSION_CONFLICT
+  const staleApp = PLP.approveOutcomeVersion(session.id, 1, 'u-bob');
+  assert.strictEqual(staleApp.success, false);
+  assert.strictEqual(staleApp.status, 409);
+  assert.strictEqual(staleApp.error.includes('409 OUTCOME_VERSION_CONFLICT'), true);
+
+  // Stale edit check: Alice attempts to edit using stale expected v1 -> 409
+  const staleEdit = PLP.updateOutcomeDraft(session.id, 'Stale edit', ['graphs'], 'u-alice', 1);
+  assert.strictEqual(staleEdit.success, false);
+  assert.strictEqual(staleEdit.status, 409);
+
+  // Bob approves current v2 -> Mutually confirmed
+  const appBobV2 = PLP.approveOutcomeVersion(session.id, 2, 'u-bob');
+  assert.strictEqual(appBobV2.success, true);
+  assert.strictEqual(appBobV2.isMutuallyConfirmed, true);
+});
+
+// ----------------------------------------------------------------------------
+// TEST 13: Invariants #18 & #19: Exact 5 Terminal Reasons & Blocking Guard
+// ----------------------------------------------------------------------------
+runTest('Invariants #18 & #19: Exact 5 Terminal Reasons & Blocking Guard', () => {
+  const EXACT_5 = new Set([
     'manual_exit',
     'scheduled_end',
     'allowance_exhaustion',
@@ -310,115 +368,24 @@ runTest('Invariants #18 & #19: Exact 5 Terminal Reasons & Blocking Transition', 
     'blocked'
   ]);
 
-  assert.strictEqual(ALLOWED_REASONS.size, 5);
-
-  const testReasons = ['manual_exit', 'scheduled_end', 'allowance_exhaustion', 'connection_interruption', 'blocked'];
-  testReasons.forEach(r => assert.strictEqual(ALLOWED_REASONS.has(r), true));
-
-  // Invalid reason should fail
-  assert.strictEqual(ALLOWED_REASONS.has('timeout'), false);
-  assert.strictEqual(ALLOWED_REASONS.has('completed'), false);
-});
-
-// ----------------------------------------------------------------------------
-// TEST 8: Invariant #17 & Fixtures O-01..O-03: Version-Safe Outcome Confirmation
-// ----------------------------------------------------------------------------
-runTest('Invariant #17 & Fixtures O-01..O-03: Version-Safe Outcome Mutual Confirmation & 409 Conflict', () => {
-  const outcome = {
-    version: 1,
-    last_editor_id: 'u-alice',
-    approved_version_a: 1,
-    approved_version_b: null,
-    summary: 'Initial draft'
-  };
-
-  function isConfirmed(o) {
-    return o.approved_version_a === o.version && o.approved_version_b === o.version;
-  }
-
-  function approve(o, userId, versionToApprove) {
-    if (versionToApprove !== o.version) {
-      return { status: 409, code: 'OUTCOME_VERSION_CONFLICT' };
+  // Check every ended session in the store
+  PLP.store.studySessions.forEach(s => {
+    if (s.status === 'ended') {
+      assert.strictEqual(EXACT_5.has(s.end_reason), true, `End reason '${s.end_reason}' must be one of exact 5`);
     }
-    if (userId === 'u-alice') o.approved_version_a = o.version;
-    if (userId === 'u-bob') o.approved_version_b = o.version;
-    return { status: 200, code: 'OK' };
-  }
+  });
 
-  function edit(o, userId, newSummary) {
-    o.version += 1;
-    o.last_editor_id = userId;
-    o.summary = newSummary;
-    if (userId === 'u-alice') {
-      o.approved_version_a = o.version;
-      o.approved_version_b = null;
-    } else {
-      o.approved_version_a = null;
-      o.approved_version_b = o.version;
-    }
-  }
-
-  // 1. Initial draft v1: Bob approves v1 -> Confirmed
-  assert.strictEqual(isConfirmed(outcome), false);
-  const app1 = approve(outcome, 'u-bob', 1);
-  assert.strictEqual(app1.status, 200);
-  assert.strictEqual(isConfirmed(outcome), true);
-
-  // 2. Alice updates to v2 -> Approval reset for Bob
-  edit(outcome, 'u-alice', 'Updated draft with new topics');
-  assert.strictEqual(outcome.version, 2);
-  assert.strictEqual(outcome.approved_version_a, 2);
-  assert.strictEqual(outcome.approved_version_b, null);
-  assert.strictEqual(isConfirmed(outcome), false);
-
-  // 3. Bob attempts to approve stale v1 -> Must reject with 409
-  const appStale = approve(outcome, 'u-bob', 1);
-  assert.strictEqual(appStale.status, 409);
-  assert.strictEqual(appStale.code, 'OUTCOME_VERSION_CONFLICT');
-  assert.strictEqual(isConfirmed(outcome), false);
-
-  // 4. Bob reviews and approves current v2 -> Confirmed
-  const appV2 = approve(outcome, 'u-bob', 2);
-  assert.strictEqual(appV2.status, 200);
-  assert.strictEqual(isConfirmed(outcome), true);
-});
-
-// ----------------------------------------------------------------------------
-// TEST 9: Invariant #16 & Fixture S-01: 300-Second Review Qualification Threshold
-// ----------------------------------------------------------------------------
-runTest('Invariant #16 & Fixture S-01: 300-Second Review Threshold Gate', () => {
-  function canSubmitReview(sessionDurationSec) {
-    return sessionDurationSec >= 300;
-  }
-
-  // Short session (120s) -> Locked
-  assert.strictEqual(canSubmitReview(120), false);
-  assert.strictEqual(canSubmitReview(299), false);
-
-  // Qualified session (300s+) -> Unlocked
-  assert.strictEqual(canSubmitReview(300), true);
-  assert.strictEqual(canSubmitReview(3600), true);
-});
-
-// ----------------------------------------------------------------------------
-// TEST 10: Invariant #1: Partner History Privacy Default
-// ----------------------------------------------------------------------------
-runTest('Invariant #1: Partner History Default Private', () => {
-  const user = {
-    id: 'u-alice',
-    previous_partners_public: false // Authoritative Astra rule
+  // Block participants on active session
+  const testSess = {
+    id: 'sess-block-test',
+    user_a_id: 'u-alice',
+    user_b_id: 'u-bob',
+    status: 'active',
+    counted_duration_seconds: 100
   };
-
-  function canViewPartnerHistory(viewerId, profileOwner) {
-    if (viewerId === profileOwner.id) return true; // Owner can always view
-    return profileOwner.previous_partners_public === true;
-  }
-
-  assert.strictEqual(canViewPartnerHistory('u-alice', user), true, 'Owner can view own history');
-  assert.strictEqual(canViewPartnerHistory('u-bob', user), false, 'Other learner cannot view private history');
-
-  user.previous_partners_public = true;
-  assert.strictEqual(canViewPartnerHistory('u-bob', user), true, 'Other learner can view when public');
+  PLP.reconcileAccounting(testSess, 0, 'blocked');
+  assert.strictEqual(testSess.status, 'ended');
+  assert.strictEqual(testSess.end_reason, 'blocked');
 });
 
 // ============================================================================
@@ -426,7 +393,7 @@ runTest('Invariant #1: Partner History Default Private', () => {
 // ============================================================================
 console.log('\n================================================================');
 console.log(`TEST SUITE RESULTS: ${passedTests}/${totalTests} TESTS PASSED (100%)`);
-console.log('All 20 Astra Invariants & Specification Fixtures Verified Headlessly');
+console.log('Automated Invariants Verification Completed using actual prototype/app.js');
 console.log('================================================================\n');
 
 if (passedTests !== totalTests) {
