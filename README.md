@@ -46,7 +46,8 @@ The project explicitly delineates two distinct delivery phases:
 
 1. **Immediate University Milestone (Target: 20–24 October 2026)**:
    - Working supervisor-review target: **20 October 2026**.
-   - Stated repository milestone: **24 October 2026** *(Formal designation as "Pre-defense 1" pending institutional confirmation; deadline discrepancy unresolved)*.
+   - Stated repository milestone: **24 October 2026** *(Formal university designation: "Probation Period 1" / "Pre-defense 1"; official required submission tag: `prob-period-1`)*.
+   - Required Submission URL: [https://github.com/belozov/peer-learning-platform/tree/prob-period-1](https://github.com/belozov/peer-learning-platform/tree/prob-period-1).
    - Deliverables: Comprehensive domain analysis, functional/non-functional requirements, architectural diagrams (source and exports), research and interview protocols, technology comparisons, 14-source literature review, 5-system comparative matrix, evaluation plan, and an interactive demonstration prototype featuring honest coverage labels.
 2. **Later Working V1 (Implementation Phase)**:
    - Persistent relational data storage in PostgreSQL, working authentication, real-time WebSocket messaging, server-side usage ledger tracking, and privacy control enforcement.
@@ -107,6 +108,7 @@ The project explicitly delineates two distinct delivery phases:
 - **Version Control**: Git repository tracking incremental progress through task-based branches (`PLP-X-feature-name`).
 - **Remote Repository**: [https://github.com/belozov/peer-learning-platform](https://github.com/belozov/peer-learning-platform) (verified reachable and synchronized).
 - **GitHub Pull Request**: [https://github.com/belozov/peer-learning-platform/pull/2](https://github.com/belozov/peer-learning-platform/pull/2) (PR #2: Pre-Defense 1 Milestone).
+- **Official Submission Tag**: [`prob-period-1`](https://github.com/belozov/peer-learning-platform/tree/prob-period-1) (Milestone 1 submission URL for university evaluation form).
 - **Task Management (YouTrack)**: [https://bekzat-diploma-2027.youtrack.cloud/projects/PLP](https://bekzat-diploma-2027.youtrack.cloud/projects/PLP)  
   *(Project Key: `PLP`, Project ID: `0-1`. All 22 milestone tasks `PLP-1` through `PLP-22` are synchronized and tracked on YouTrack Cloud; see [`docs/youtrack-tasks.md`](docs/youtrack-tasks.md))*.
 

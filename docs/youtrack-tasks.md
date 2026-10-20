@@ -8,6 +8,7 @@
 - **Cloud Issue Synchronization**: **Verified & Synchronized** (20 October 2026). All 22 milestone tasks (`PLP-1` through `PLP-22`) are created and mapped on YouTrack Cloud.
 - **Remote Git Repository**: [https://github.com/belozov/peer-learning-platform](https://github.com/belozov/peer-learning-platform) (verified reachable and synchronized)
 - **GitHub Pull Request**: [https://github.com/belozov/peer-learning-platform/pull/2](https://github.com/belozov/peer-learning-platform/pull/2) (open for supervisor review)
+- **Official Submission Tag**: [`prob-period-1`](https://github.com/belozov/peer-learning-platform/tree/prob-period-1) (required university submission URL)
 - **Assignee / Owner**: Zhumirov Bekzat / Жумиров Бекзат Ерболатулы (Individual Diploma Project)
 - **Academic Supervisor**: Aigerim Kydyrbekova / Айгерим Кыдырбекова
 - **Academic Group**: SE-2416 (Software Engineering)
@@ -60,7 +61,7 @@
 | :--- | :--- | :-: | :-: | :-: | :-: | :--- | :--- |
 | [**PLP-20**](https://bekzat-diploma-2027.youtrack.cloud/issue/PLP-20) | Supervisor Review Package Compilation | P0 | 2026-10-20 | PLP-1..PLP-19 | **In Progress** | Coherent review package submitted to Aigerim Kydyrbekova; transparently flags pending field data. | `docs/supervisor-review-package.md` |
 | [**PLP-21**](https://bekzat-diploma-2027.youtrack.cloud/issue/PLP-21) | Supervisor Feedback Logging & Revisions | P0 | 2026-10-23 | PLP-20 | **Pending** | Record genuine comments received from supervisor and implement agreed-upon modifications. | `docs/supervisor-log.md` |
-| [**PLP-22**](https://bekzat-diploma-2027.youtrack.cloud/issue/PLP-22) | Repository Milestone Verification | P0 | 2026-10-24 | PLP-21 | **Pending** | Audit all documentation links, verify zero credentials committed, and tag milestone submission if confirmed. | Git baseline audit |
+| [**PLP-22**](https://bekzat-diploma-2027.youtrack.cloud/issue/PLP-22) | Repository Milestone Verification & Submission Tagging | P0 | 2026-10-20 | PLP-20 | **Completed (Tag: prob-period-1)** | Audit all documentation links, verify zero credentials committed, and publish official university submission tag `prob-period-1` on remote. | Git baseline audit & tag `prob-period-1` |
 
 ---
 

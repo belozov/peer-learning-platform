@@ -216,7 +216,7 @@ The evaluation plan (`docs/evaluation-plan.md`) establishes a formal research pr
 | 7 | Architecture & Diagrams | `docs/architecture.md`, `diagrams/` | **Completed (Draft Exports)** |
 | 8 | UX / Prototype | `prototype/` | **Delivered (Simulation Prototype)** |
 | 9 | Verification & Evaluation Plan | `docs/evaluation-plan.md` | **Completed (Protocol)** |
-| 10 | Project Management & Risks | `docs/youtrack-tasks.md`, `README.md` | **Completed (Synchronized)** |
+| 10 | Project Management & Risks | `docs/youtrack-tasks.md`, `README.md` | **Completed (Synchronized & Tagged)** |
 | 11 | Supervisor Feedback | `docs/supervisor-log.md` | **Pending Supervisor Review** |
 
 ### 8.2 Open Architectural Decisions Awaiting Supervisor Guidance
@@ -244,6 +244,7 @@ Access in browser: `http://localhost:3000`
 ### 9.2 Project Tracking, Remote Git & Review Archive
 - **YouTrack Cloud Project**: [https://bekzat-diploma-2027.youtrack.cloud/projects/PLP](https://bekzat-diploma-2027.youtrack.cloud/projects/PLP) (Project Key: `PLP`, 22 milestone tasks `PLP-1`..`PLP-22` synchronized).
 - **Remote Git Branch**: `PLP-16-research-literature-and-evaluation` on `https://github.com/belozov/peer-learning-platform`.
-- **Verified Remote Commit**: `34a263df7054f9a08e1781c62d08a5c378e932b1` (on `PLP-16-research-literature-and-evaluation`).
-- **GitHub Pull Request**: [https://github.com/belozov/peer-learning-platform/pull/2](https://github.com/belozov/peer-learning-platform/pull/2) (open for supervisor review).
+- **GitHub Pull Request**: [https://github.com/belozov/peer-learning-platform/pull/2](https://github.com/belozov/peer-learning-platform/pull/2) (PR #2, open for supervisor review).
+- **Official Submission Tag**: [`prob-period-1`](https://github.com/belozov/peer-learning-platform/tree/prob-period-1).
+- **Required University Submission URL**: [https://github.com/belozov/peer-learning-platform/tree/prob-period-1](https://github.com/belozov/peer-learning-platform/tree/prob-period-1).
 - **Review ZIP Archive**: `C:\Users\QWERTY\Documents\peer-learning-platform-batch-6-review.zip` (self-contained review package without `.git/` or `node_modules/`).
