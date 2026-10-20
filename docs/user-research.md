@@ -3,15 +3,16 @@
 ## 1. Relevance Research Protocol
 
 ### 1.1 Methodology and Purpose
-To satisfy university requirements for **Evidence of Relevance**, this study employs qualitative semi-structured discovery interviews with 3–5 target learners (university students, secondary students, and self-directed adult learners). The investigation focuses on identifying friction points in self-directed study partner discovery, evaluating the necessity of structured compatibility filters, and identifying privacy expectations.
+To satisfy university requirements for **Evidence of Relevance**, this study designs qualitative semi-structured discovery interviews with 3–5 target learners. The investigation focuses on identifying friction points in self-directed study partner discovery, evaluating the necessity of structured compatibility filters, and identifying privacy expectations.
 
-### 1.2 Methodological Safeguards
-- **Anti-Bias Protocol**: To prevent confirmation bias, interviewers ask about participants' actual past behaviors and frustrations (Questions 1–7) *before* introducing the proposed platform concepts (Question 8).
+### 1.2 Ethics, Consent & Participant Boundaries
+- **Adult-Only Initial Research Boundary (Safeguard)**: While the platform's broader product vision includes secondary students, **all initial discovery interviews and prototype evaluation sessions are strictly restricted to adult participants ($\ge 18\text{ years of age}$)**. Any future empirical research involving minors requires formal institutional ethical review and parental consent procedures.
+- **Voluntary & Informed Consent**: Participants are informed that participation is voluntary, that they may withdraw at any time, and that responses are anonymized.
+- **Data Handling**: Personal identifiers (names, emails) are excluded from project records and replaced with unique codes (`P-01`, `P-02`, etc.). Recorded quotations require explicit participant consent.
 - **Epistemological Separation**: Findings are strictly divided into three tiers:
   1. *Direct Observations / Permitted Quotations*: Verbatim or near-verbatim factual statements made by the interviewee.
   2. *Analyst Interpretations*: Theoretical inferences drawn regarding underlying learner needs.
   3. *Challenged Assumptions*: Previous system hypotheses contradicted or refined by the evidence.
-- **Ethics and Anonymity**: Participation is entirely voluntary. Personal identifiers are removed and replaced with codes (`P-01`, `P-02`, etc.).
 
 ---
 
@@ -24,7 +25,7 @@ To satisfy university requirements for **Evidence of Relevance**, this study emp
 5. **Handling Failure / Cancellations**: *"Have you experienced a study partner cancelling at the last minute or failing to show up? How was that handled, and how did it affect your study routine?"*
 6. **Privacy & Boundaries**: *"What personal information or study history would you prefer to keep completely private versus share publicly with potential study partners?"*
 7. **Trust & Accountability**: *"What would make a study history record or peer review trustworthy to you when evaluating a potential partner?"*
-8. **Concept Feedback**: *(Walk the participant through the proposed 12-step flow)*: *"Looking at this workflow (Channel → Listing → Ranked Discovery → Acceptance → Monitored Session Chat), which parts feel intuitive, and where does it feel unclear or unnecessary?"*
+8. **Concept Feedback**: *(Walk the participant through the proposed workflow)*: *"Looking at this workflow (Channel → Listing → Ranked Discovery → Acceptance → Monitored Session Chat), which parts feel intuitive, and where does it feel unclear or unnecessary?"*
 
 ---
 
@@ -35,8 +36,9 @@ To satisfy university requirements for **Evidence of Relevance**, this study emp
 ### Interview Log: Participant P-01
 - **Participant Code**: `P-01`
 - **Date / Time**: `[PENDING: Date of interview]`
-- **Learner Category**: `[PENDING: University Student | Secondary Student | Adult Independent Learner]`
-- **Voluntary Participation Confirmed**: `[ ] Yes  [ ] No`
+- **Learner Category**: `[PENDING: University Student | Adult Independent Learner] (Adult >= 18)`
+- **Informed Consent Confirmed**: `[ ] Yes  [ ] No`
+- **Quotation Permission Granted**: `[ ] Yes  [ ] No`
 - **Primary Study Domain**: `[PENDING: e.g., Python / Mathematics / English]`
 
 | Field | Content / Field Record |
@@ -53,8 +55,9 @@ To satisfy university requirements for **Evidence of Relevance**, this study emp
 ### Interview Log: Participant P-02
 - **Participant Code**: `P-02`
 - **Date / Time**: `[PENDING: Date of interview]`
-- **Learner Category**: `[PENDING: University Student | Secondary Student | Adult Independent Learner]`
-- **Voluntary Participation Confirmed**: `[ ] Yes  [ ] No`
+- **Learner Category**: `[PENDING: Adult >= 18]`
+- **Informed Consent Confirmed**: `[ ] Yes  [ ] No`
+- **Quotation Permission Granted**: `[ ] Yes  [ ] No`
 - **Primary Study Domain**: `[PENDING]`
 
 | Field | Content / Field Record |
@@ -71,8 +74,9 @@ To satisfy university requirements for **Evidence of Relevance**, this study emp
 ### Interview Log: Participant P-03
 - **Participant Code**: `P-03`
 - **Date / Time**: `[PENDING: Date of interview]`
-- **Learner Category**: `[PENDING: University Student | Secondary Student | Adult Independent Learner]`
-- **Voluntary Participation Confirmed**: `[ ] Yes  [ ] No`
+- **Learner Category**: `[PENDING: Adult >= 18]`
+- **Informed Consent Confirmed**: `[ ] Yes  [ ] No`
+- **Quotation Permission Granted**: `[ ] Yes  [ ] No`
 - **Primary Study Domain**: `[PENDING]`
 
 | Field | Content / Field Record |
@@ -86,17 +90,36 @@ To satisfy university requirements for **Evidence of Relevance**, this study emp
 
 ---
 
-## 4. Early Literature Collection (Seed Academic Bibliography)
+## 4. Literature Collection & Source Audit
 
-To begin literature synthesis early alongside technical design, the following seed publications have been gathered and categorized:
+### 4.1 Bibliographic Audit Status
+Following an audit against publisher and index records, previous incorrect and unverified bibliographic entries were quarantined or removed:
+- *Removed*: Fabricated bibliographic entries previously attributed to *Computers in Human Behavior* (107, 106263) and *Computers & Education* (158, 103987).
+- *Quarantined*: Unverified entries (Zheng et al., Borchers et al., Rientes et al.) are marked **Unverified—excluded from compliance counts** pending accessible verified copies.
+- *Verified Status*: **4 verified scientific peer-reviewed journal articles**, **2 verified scholarly books / book chapters**, and **1 foundational monograph**.
 
-| № | Citation | Publication Type & Year | Core Focus / Method | Relevance to Platform & Design Implications |
-| :-: | :--- | :-: | :--- | :--- |
-| **1** | **Topping, K. J. (2005).** *Trends in peer learning.* Educational Psychology, 25(6), 631–645. | Journal Article (2005) [Foundational] | Theoretical framework and meta-analysis of peer tutoring and collaborative learning models. | Establishes pedagogical value of reciprocal peer learning; justifies 1-to-1 matching and structured goal-setting. |
-| **2** | **Boud, D., Cohen, R., & Sampson, J. (2014).** *Peer learning in higher education: Learning from and with each other.* Routledge. | Academic Book (2014) [Foundational] | In-depth examination of non-hierarchical collaborative learning in tertiary institutions. | Guides the definition of peer roles (excluding paid teacher hierarchies) and mutual reciprocity principles. |
-| **3** | **Zheng, L., et al. (2021).** *The effectiveness of group formation mechanisms in computer-supported collaborative learning.* Educational Technology Research and Development, 69(2), 657–686. | Journal Article (2021) [Recent Core] | Empirical evaluation of algorithmic pairing vs. self-selection in CSCL environments. | Confirms that multi-attribute pairing based on shared goals and complementary knowledge significantly outperforms unguided discovery. |
-| **4** | **Al-Shanfari, L., et al. (2020).** *Peer-to-peer recommendation systems in educational social networks.* Computers in Human Behavior, 107, 106263. | Journal Article (2020) [Recent Core] | Algorithmic analysis of similarity metrics (Jaccard, cosine) applied to learner profile vectors. | Directly informs our formulation of the topic Jaccard index ($T$) and level proximity metric ($L$). |
-| **5** | **Borchers, C., et al. (2022).** *Evaluating explainability in automated educational partner recommendations.* ACM Conference on Learning @ Scale (L@S '22), 112–123. | Conference Paper (2022) [Recent Core] | User study on how human-readable explanations impact acceptance rates of recommended peers. | Provides empirical justification for presenting explicit explanations (*"same topic, full time overlap"*) rather than raw similarity scores. |
-| **6** | **Rientes, B., et al. (2019).** *Understanding social learning networks and virtual study groups in distance education.* Distance Education, 40(3), 329–347. | Journal Article (2019) [Recent Core] | Quantitative study on scheduling friction and timezone barriers in remote peer groups. | Supports treating schedule overlap and language proficiency as hard eligibility gates rather than weighted scores. |
+---
 
-*(This seed collection forms the foundation for Batch 5, where it will be expanded to $\ge 12$ sources, including at least 8 scientific publications, alongside a comprehensive critical synthesis).*
+### 4.2 Verified Academic Bibliography & Analysis Table
+
+| № | Verified Citation | Publication Type & Identifier | Relevant Findings / Theoretical Contribution | Limitations / Scope | Platform Engineering Inference | Verification Status |
+| :-: | :--- | :--- | :--- | :--- | :--- | :-: |
+| **1** | **Topping, K. J. (2005).** *Trends in peer learning.* Educational Psychology, 25(6), 631–645. | Peer-Reviewed Journal Article (Review)<br/>DOI: [10.1080/01443410500345172](https://doi.org/10.1080/01443410500345172) | Qualitative review of peer tutoring and collaborative learning models across education sectors. Highlights cognitive benefits of explanatory discourse. | Broad literature review; does not provide empirical tests of online pairing algorithms. | Provides general theoretical justification for non-hierarchical, one-to-one peer study formats. | **Verified** |
+| **2** | **Chi, M. T. H. (2009).** *Active-constructive-interactive: A conceptual framework for differentiating learning activities.* Topics in Cognitive Science, 1(1), 73–105. | Peer-Reviewed Journal Article<br/>DOI: [10.1111/j.1756-8765.2008.01005.x](https://doi.org/10.1111/j.1756-8765.2008.01005.x) | Formulates the ICAP hypothesis: interactive dialogue between peers produces superior cognitive change compared to constructive or active individual activities. | Conceptual framework; does not benchmark specific computer-mediated chat modalities against video. | Theoretical motivation for prioritizing synchronous peer dialogue in sessions over static content repository browsing. | **Verified** |
+| **3** | **Kulkarni, C., Wei, K. P., Le, H., Chia, D., Papadopoulos, K., Cheng, J., Koller, D., & Klemmer, S. R. (2013).** *Peer and self assessment in massive online classes.* ACM Transactions on Computer-Human Interaction (TOCHI), 20(6), Article 33, 1–31. | Peer-Reviewed Journal Article<br/>DOI: [10.1145/2505057](https://doi.org/10.1145/2505057) | Empirical evaluation demonstrating that structured rubrics and calibration achieve high inter-rater reliability in web-based peer evaluations. | Focuses on asynchronous assignment grading rather than interpersonal study session ratings. | Motivates structured, discrete review criteria (stars + text) and post-session mutual outcome confirmation. | **Verified** |
+| **4** | **Roscoe, R. D., & Chi, M. T. H. (2007).** *Understanding tutor learning: Knowledge-building and knowledge-telling in peer tutors' explanations and questions.* Review of Educational Research, 77(4), 534–574. | Peer-Reviewed Journal Article (Review)<br/>DOI: [10.3102/0034654307309920](https://doi.org/10.3102/0034654307309920) | Distinguishes superficial "knowledge-telling" from deep "knowledge-building" in peer explanations; collaborative questioning triggers deeper reflection. | Investigated primarily in laboratory and classroom tutoring settings. | Informs post-session outcome documentation where learners summarize shared topics. | **Verified** |
+| **5** | **Dillenbourg, P. (1999).** *What do you mean by 'collaborative learning'?* In P. Dillenbourg (Ed.), *Collaborative-learning: Cognitive and Computational Approaches* (pp. 1–19). Elsevier Science. | Scholarly Book Chapter<br/>ISBN: 9780080435398 | Foundational definition of collaboration as a joint problem space characterized by symmetry of knowledge, symmetry of goals, and symmetric action. | Conceptual taxonomy; theoretical rather than empirical software evaluation. | Informs the symmetrical design of learner roles (author and respondent parity) and shared outcome confirmation. | **Verified** |
+| **6** | **Boud, D., Cohen, R., & Sampson, J. (Eds.). (2001 / Reissue 2014).** *Peer Learning in Higher Education: Learning from and with Each Other.* Routledge. | Scholarly Edited Book<br/>ISBN: 9780749436124 | Examines student-to-student reciprocal learning practices in tertiary education without teacher intervention. | Edited volume collection of institutional case studies; not a single journal study. | Guides the formal exclusion of commercial paid tutor hierarchies in favor of peer reciprocity. | **Verified** |
+| **7** | **Vygotsky, L. S. (1978).** *Mind in Society: The Development of Higher Psychological Processes.* Harvard University Press. | Foundational Academic Monograph<br/>ISBN: 9780674576292 | Introduces the Zone of Proximal Development (ZPD): distance between actual development and potential through guidance or peer collaboration. | Seminal psychological theory; not an engineering specification. | Motivates the hypothesis that adjacent-level pairing ($L=0.5$) provides cognitive scaffolding. | **Verified** |
+
+---
+
+### 4.3 Quarantined / Unverified Sources (Excluded from Compliance Counts)
+
+| Source Identifier | Claimed Focus | Current Status | Required Action Prior to Compliance Inclusion |
+| :--- | :--- | :---: | :--- |
+| *Zheng et al. (Nominal 2021)* | Group formation mechanisms in CSCL | **Unverified — Excluded from counts** | Locate verified publisher record, check DOI, and verify empirical claims. |
+| *Borchers et al. (Nominal 2022)* | Explainability in educational recommendations | **Unverified — Excluded from counts** | Locate verified ACM conference proceedings record and verify methodology. |
+| *Rientes et al. (Nominal 2019)* | Virtual study groups in distance education | **Unverified — Excluded from counts** | Locate verified publication details and verify scheduling friction claims. |
+
+> **Expanded Academic Bibliography**: The seed bibliography above has been expanded into the standalone [Literature Review & Critical Synthesis](literature-review.md), containing **14 verified academic sources** (11 peer-reviewed scientific journal articles, 2 scholarly books/chapters, 1 foundational monograph; 7 published 2021–2024) complete with CrossRef/publisher DOIs, thematic analysis matrix, and critical engineering synthesis. All unverified entries remain quarantined.

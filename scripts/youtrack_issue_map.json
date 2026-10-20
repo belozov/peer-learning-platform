@@ -1,0 +1,134 @@
+[
+  {
+    "task_id": "PLP-1",
+    "idReadable": "PLP-1",
+    "summary": "PLP-1: Repository Initialization & Baseline Documentation",
+    "link": "https://bekzat-diploma-2027.youtrack.cloud/issue/PLP-1"
+  },
+  {
+    "task_id": "PLP-2",
+    "idReadable": "PLP-2",
+    "summary": "PLP-2: Project Proposal & Scope Delimitation",
+    "link": "https://bekzat-diploma-2027.youtrack.cloud/issue/PLP-2"
+  },
+  {
+    "task_id": "PLP-3",
+    "idReadable": "PLP-3",
+    "summary": "PLP-3: University Compliance & Decision Register",
+    "link": "https://bekzat-diploma-2027.youtrack.cloud/issue/PLP-3"
+  },
+  {
+    "task_id": "PLP-4",
+    "idReadable": "PLP-4",
+    "summary": "PLP-4: User Research Protocol & Seed Bibliography",
+    "link": "https://bekzat-diploma-2027.youtrack.cloud/issue/PLP-4"
+  },
+  {
+    "task_id": "PLP-5",
+    "idReadable": "PLP-5",
+    "summary": "PLP-5: Functional Requirements Catalog (FR-01..19)",
+    "link": "https://bekzat-diploma-2027.youtrack.cloud/issue/PLP-5"
+  },
+  {
+    "task_id": "PLP-6",
+    "idReadable": "PLP-6",
+    "summary": "PLP-6: Non-Functional Requirements & Test Fixtures",
+    "link": "https://bekzat-diploma-2027.youtrack.cloud/issue/PLP-6"
+  },
+  {
+    "task_id": "PLP-7",
+    "idReadable": "PLP-7",
+    "summary": "PLP-7: Field-Level Access Control Matrix",
+    "link": "https://bekzat-diploma-2027.youtrack.cloud/issue/PLP-7"
+  },
+  {
+    "task_id": "PLP-8",
+    "idReadable": "PLP-8",
+    "summary": "PLP-8: Session Lifecycle State Machine & Accounting Rules",
+    "link": "https://bekzat-diploma-2027.youtrack.cloud/issue/PLP-8"
+  },
+  {
+    "task_id": "PLP-9",
+    "idReadable": "PLP-9",
+    "summary": "PLP-9: System Context Diagram & Architecture Narrative",
+    "link": "https://bekzat-diploma-2027.youtrack.cloud/issue/PLP-9"
+  },
+  {
+    "task_id": "PLP-10",
+    "idReadable": "PLP-10",
+    "summary": "PLP-10: Use Case Diagram & Actor Matrix",
+    "link": "https://bekzat-diploma-2027.youtrack.cloud/issue/PLP-10"
+  },
+  {
+    "task_id": "PLP-11",
+    "idReadable": "PLP-11",
+    "summary": "PLP-11: Component Architecture Diagram",
+    "link": "https://bekzat-diploma-2027.youtrack.cloud/issue/PLP-11"
+  },
+  {
+    "task_id": "PLP-12",
+    "idReadable": "PLP-12",
+    "summary": "PLP-12: Relational Data Model Specification",
+    "link": "https://bekzat-diploma-2027.youtrack.cloud/issue/PLP-12"
+  },
+  {
+    "task_id": "PLP-13",
+    "idReadable": "PLP-13",
+    "summary": "PLP-13: Technology Alternatives & Trade-Off Comparison",
+    "link": "https://bekzat-diploma-2027.youtrack.cloud/issue/PLP-13"
+  },
+  {
+    "task_id": "PLP-14",
+    "idReadable": "PLP-14",
+    "summary": "PLP-14: Interactive Prototype Core Journey",
+    "link": "https://bekzat-diploma-2027.youtrack.cloud/issue/PLP-14"
+  },
+  {
+    "task_id": "PLP-15",
+    "idReadable": "PLP-15",
+    "summary": "PLP-15: Prototype Exception & Simulation Banners",
+    "link": "https://bekzat-diploma-2027.youtrack.cloud/issue/PLP-15"
+  },
+  {
+    "task_id": "PLP-16",
+    "idReadable": "PLP-16",
+    "summary": "PLP-16: Adult Learner Relevance Field Interviews",
+    "link": "https://bekzat-diploma-2027.youtrack.cloud/issue/PLP-16"
+  },
+  {
+    "task_id": "PLP-17",
+    "idReadable": "PLP-17",
+    "summary": "PLP-17: Literature Review Matrix Expansion ($\\ge 12$ sources)",
+    "link": "https://bekzat-diploma-2027.youtrack.cloud/issue/PLP-17"
+  },
+  {
+    "task_id": "PLP-18",
+    "idReadable": "PLP-18",
+    "summary": "PLP-18: Existing Systems Comparative Analysis",
+    "link": "https://bekzat-diploma-2027.youtrack.cloud/issue/PLP-18"
+  },
+  {
+    "task_id": "PLP-19",
+    "idReadable": "PLP-19",
+    "summary": "PLP-19: Empirical Evaluation Protocol (RQ1\u2013RQ3)",
+    "link": "https://bekzat-diploma-2027.youtrack.cloud/issue/PLP-19"
+  },
+  {
+    "task_id": "PLP-20",
+    "idReadable": "PLP-20",
+    "summary": "PLP-20: Supervisor Review Package Compilation",
+    "link": "https://bekzat-diploma-2027.youtrack.cloud/issue/PLP-20"
+  },
+  {
+    "task_id": "PLP-21",
+    "idReadable": "PLP-21",
+    "summary": "PLP-21: Supervisor Feedback Logging & Revisions",
+    "link": "https://bekzat-diploma-2027.youtrack.cloud/issue/PLP-21"
+  },
+  {
+    "task_id": "PLP-22",
+    "idReadable": "PLP-22",
+    "summary": "PLP-22: Repository Milestone Verification",
+    "link": "https://bekzat-diploma-2027.youtrack.cloud/issue/PLP-22"
+  }
+]

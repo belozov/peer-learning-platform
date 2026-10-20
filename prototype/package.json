@@ -1,0 +1,19 @@
+{
+  "name": "peer-learning-platform-prototype",
+  "version": "1.0.0",
+  "description": "Interactive Website Prototype for Compatibility-Based Peer Learning Platform (Batch 4)",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx serve -l 3000 .",
+    "dev": "npx serve -l 3000 .",
+    "test": "node test-prototype.js"
+  },
+  "keywords": [
+    "peer-learning",
+    "compatibility-matching",
+    "prototype",
+    "se-2416"
+  ],
+  "author": "Zhumirov Bekzat",
+  "license": "UNLICENSED"
+}

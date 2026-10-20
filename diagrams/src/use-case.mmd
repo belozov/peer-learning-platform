@@ -1,0 +1,103 @@
+graph LR
+    %% UML Use Case Diagram (Proposed Working-V1 Architecture & Domain Scope)
+    %% Platform: Compatibility-Based Peer Learning Platform
+    %% Student: Zhumirov Bekzat (SE-2416) | Supervisor: Aigerim Kydyrbekova
+
+    subgraph Actors["Human Actors & Learner Roles"]
+        V["Visitor"]
+        L["Learner"]
+        LA["Listing Author (Learner Role)"]
+        R["Respondent (Learner Role)"]
+        SP["Session Participant (Learner Role)"]
+        A["Platform Administrator"]
+    end
+
+    subgraph SystemBoundary["Peer Learning Platform"]
+
+        subgraph UC_Auth["Identity & Profile Management"]
+            UC01["UC-01: Register & Authenticate"]
+            UC02["UC-02: Manage Preferences, Languages & Dated Availability"]
+            UC03["UC-03: Manage Profile Privacy & Partner History"]
+        end
+
+        subgraph UC_Community["Communities & Topic Channels"]
+            UC04["UC-04: Browse Communities & Channels"]
+            UC05["UC-05: Join / Leave Topic Channel"]
+            UC06["UC-06: Create / Read Channel Posts"]
+            UC20["UC-20: Create & Configure Channels"]
+        end
+
+        subgraph UC_Discovery["Partner Discovery & Listings"]
+            UC07["UC-07: Create Study Listing"]
+            UC08["UC-08: Find Partner (Ranked / Chronological)"]
+            UC09["UC-09: Inspect Match Breakdown (T, G, L Score / 100)"]
+            UC10["UC-10: Respond to Study Listing"]
+            UC11["UC-11: Accept Partner & Schedule Session"]
+        end
+
+        subgraph UC_Session["Session Execution & Accounting"]
+            UC12["UC-12: Check-in & Start Scheduled Session"]
+            UC13["UC-13: Exchange Session Chat Messages"]
+            UC14["UC-14: Monitor Time HUD (10,800s Cap & Grace)"]
+            UC15["UC-15: Finalize Session (5 Terminal Reasons)"]
+            UC16["UC-16: Collaborative Outcome Confirmation (Proposed)"]
+            UC17["UC-17: Submit Partner Review (>= 300s Gate)"]
+        end
+
+        subgraph UC_Safety["Safety & Moderation"]
+            UC18["UC-18: Block User & Terminate Active Contact"]
+            UC19["UC-19: Submit & Moderate Abuse Reports"]
+        end
+    end
+
+    %% Visitor associations
+    V --- UC01
+    V --- UC04
+
+    %% Learner general associations
+    L --- UC01
+    L --- UC02
+    L --- UC03
+    L --- UC04
+    L --- UC05
+    L --- UC06
+    L --- UC08
+    L --- UC09
+    L --- UC18
+    L --- UC19
+
+    %% Role specializations
+    L -.->|specializes as| LA
+    L -.->|specializes as| R
+    L -.->|specializes as| SP
+
+    %% Contextual Learner Role associations
+    LA --- UC07
+    LA --- UC11
+
+    R --- UC10
+
+    SP --- UC12
+    SP --- UC13
+    SP --- UC14
+    SP --- UC15
+    SP --- UC16
+    SP --- UC17
+
+    %% Administrator associations
+    A --- UC19
+    A --- UC20
+
+    %% Preconditions, Includes, and Extends
+    UC08 -.->|"<<include>> precondition: Channel Membership"| UC05
+    UC07 -.->|"<<include>> precondition: Channel Membership"| UC05
+    UC11 -.->|"<<include>> creates Scheduled Session"| UC12
+    UC17 -.->|"<<extend>> condition: duration >= 300s"| UC15
+    UC18 -.->|"<<extend>> triggers Reason: blocked"| UC15
+
+    classDef actorStyle fill:#f8fafc,stroke:#475569,stroke-width:2px;
+    classDef boundaryStyle fill:#ffffff,stroke:#94a3b8,stroke-width:1px;
+    classDef ucStyle fill:#f0fdf4,stroke:#16a34a,stroke-width:1px;
+
+    class V,L,LA,R,SP,A actorStyle;
+    class UC01,UC02,UC03,UC04,UC05,UC06,UC07,UC08,UC09,UC10,UC11,UC12,UC13,UC14,UC15,UC16,UC17,UC18,UC19,UC20 ucStyle;

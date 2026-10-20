@@ -1,0 +1,87 @@
+graph TD
+    %% Component Architecture Diagram
+    %% Classification: Proposed Working-V1 Architecture (Distinguished from Batch 4 Client-Side Prototype)
+    %% Platform: Compatibility-Based Peer Learning Platform
+    %% Student: Zhumirov Bekzat (SE-2416) | Supervisor: Aigerim Kydyrbekova
+
+    subgraph ClientTier["Frontend Client Tier (Proposed Working-V1: React 18 + TypeScript / Vite)"]
+        UI_Router["Client Router & Navigation"]
+        UI_Auth["Auth, Languages & Profile UI"]
+        UI_Channel["Community & Channel Explorer UI<br/>(Channel Membership Gating)"]
+        UI_Discovery["Listing Discovery & Feed UI<br/>(Displays Score / 100 & Match Breakdown)"]
+        UI_Chat["Session Chat UI (Simulated in Prototype / WebSocket in V1)"]
+        UI_HUD["Monotonic Accounting HUD (10,800s Cap)"]
+        UI_Outcome["Outcome Collaboration & Review Modal"]
+
+        UI_Router --> UI_Auth
+        UI_Router --> UI_Channel
+        UI_Router --> UI_Discovery
+        UI_Router --> UI_Chat
+        UI_Chat --- UI_HUD
+        UI_Chat --- UI_Outcome
+    end
+
+    subgraph APITier["Modular Monolith Backend Tier (Proposed Working-V1: Node.js / Express 5 + TypeScript)"]
+        HTTP_In["Express HTTP Middleware Pipeline<br/>(JWT Auth, ReBAC Authorization, Rate Limiter)"]
+        WS_Gate["WebSocket Gateway (ws / RFC 6455)<br/>(Session Connection Manager & 60s Grace Timer)"]
+
+        subgraph CoreModules["Domain Subsystems (Server-Authoritative in Working-V1)"]
+            M_Auth["Identity & Profile Module<br/>(Users, Topic Preferences, Dated Availability)"]
+            M_Channel["Community & Channel Gate Module<br/>(Memberships, Channel Gating, Posts)"]
+            M_Match["Server Matching & Ranking Engine<br/>(Identical Filters, Unrounded 0.40T+0.35G+0.25L)"]
+            M_Session["Session Coordination Service<br/>(Scheduled State, Participant Check-In, 5 Reasons)"]
+            M_Acct["Time Accounting & Usage Ledger<br/>(10,800s Cap, UTC Day Splitting, Idempotency)"]
+            M_Rep["Reputation & Review Service<br/>(Version-Safe Outcomes, >= 300s Review Gate)"]
+            M_Mod["Safety & Moderation Module<br/>(User Blocks, Abuse Reports)"]
+        end
+
+        HTTP_In --> M_Auth
+        HTTP_In --> M_Channel
+        HTTP_In --> M_Match
+        HTTP_In --> M_Session
+        HTTP_In --> M_Acct
+        HTTP_In --> M_Rep
+        HTTP_In --> M_Mod
+
+        WS_Gate <-->|Presence & State Updates| M_Session
+        M_Session --> M_Acct
+        M_Session --> M_Rep
+        M_Match --> M_Channel
+    end
+
+    subgraph DataTier["Data Persistence Tier (Proposed Working-V1: PostgreSQL 16)"]
+        PG_Pool["PostgreSQL Connection Pool (pg)"]
+        
+        subgraph Tables["Relational Database Schema"]
+            T_Users["users / learning_preferences / availability_slots"]
+            T_Channels["communities / channels / channel_memberships / posts"]
+            T_Listings["study_listings / listing_responses (Permanent Unique)"]
+            T_Sessions["study_sessions / session_messages"]
+            T_Accounting["usage_ledgers (Integer Seconds, UTC Apportioned)"]
+            T_Reputation["session_outcomes (Versioned) / peer_reviews"]
+            T_Moderation["user_blocks / moderation_reports / friendships"]
+        end
+
+        PG_Pool --> T_Users
+        PG_Pool --> T_Channels
+        PG_Pool --> T_Listings
+        PG_Pool --> T_Sessions
+        PG_Pool --> T_Accounting
+        PG_Pool --> T_Reputation
+        PG_Pool --> T_Moderation
+    end
+
+    %% Client-to-Server Protocols
+    UI_Discovery -->|"REST / HTTPS (JSON)"| HTTP_In
+    UI_Channel -->|"REST / HTTPS (JSON)"| HTTP_In
+    UI_Auth -->|"REST / HTTPS (JSON)"| HTTP_In
+    UI_Chat <-->|"Bidirectional WebSocket (Working-V1)"| WS_Gate
+
+    %% Backend-to-Database
+    CoreModules -->|"SQL Queries & Transactions (ACID)"| PG_Pool
+
+    style ClientTier fill:#f8fafc,stroke:#3b82f6,stroke-width:2px;
+    style APITier fill:#f0fdf4,stroke:#22c55e,stroke-width:2px;
+    style DataTier fill:#fefce8,stroke:#eab308,stroke-width:2px;
+    style CoreModules fill:#ffffff,stroke:#10b981,stroke-width:1px;
+    style Tables fill:#ffffff,stroke:#ca8a04,stroke-width:1px;

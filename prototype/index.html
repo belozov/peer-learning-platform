@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compatibility-Based Peer Learning Platform - Interactive Prototype</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Top Simulation Banner & Classification Indicators -->
+  <header class="banner-simulation" role="banner">
+    <div>
+      <strong>PROTOTYPE SIMULATION:</strong> In-Memory Client-Side State Machine | Student: Zhumirov Bekzat (SE-2416) | Supervisor: Aigerim Kydyrbekova
+    </div>
+    <div class="badges">
+      <span class="badge-confirmed" title="Instruction requirement">Confirmed: 180m Allowance</span>
+      <span class="badge-proposed" title="Proposed platform design awaiting university evaluation">Proposed: UTC / 60s Grace / 300s Review / Mutual Outcome</span>
+    </div>
+  </header>
+
+  <!-- App Header with Persona Switcher, Demo Clock, and Balance HUD -->
+  <div class="app-header">
+    <div class="brand-section">
+      <div class="brand-title">Peer Learning Platform</div>
+      <span class="tag" style="background:#e0e7ff; color:#3730a3; font-weight:700;">Diploma Prototype V1</span>
+    </div>
+
+    <!-- Demo Clock Display & Controls -->
+    <div style="display:flex; align-items:center; gap:8px; background:#f8fafc; padding:4px 10px; border-radius:var(--radius-sm); border:1px solid var(--border); font-size:12px;">
+      <span style="font-weight:700; color:var(--text-muted); text-transform:uppercase;">Demo Clock:</span>
+      <span id="hud-demo-clock" style="font-family:monospace; font-weight:700; color:#0f172a;">2026-10-20 12:00 UTC</span>
+      <button class="btn btn-secondary" style="padding:2px 6px; font-size:11px;" onclick="window.PLP.advanceDemoClock(3600)">+1h</button>
+      <button class="btn btn-secondary" style="padding:2px 6px; font-size:11px;" onclick="window.PLP.advanceDemoClock(86400)">+1d</button>
+    </div>
+
+    <div class="persona-switcher">
+      <label for="persona-select">Active Persona:</label>
+      <select id="persona-select" aria-label="Select Active Persona">
+        <option value="u-alice">Alice (Intermediate Learner)</option>
+        <option value="u-bob">Bob (Intermediate Learner)</option>
+        <option value="u-carol">Carol (Advanced Learner)</option>
+        <option value="u-dave">Dave (Blocked Learner)</option>
+        <option value="u-eve">Eve (No Preferences / Chrono Fallback)</option>
+        <option value="u-admin">Platform Moderator (Admin)</option>
+      </select>
+    </div>
+
+    <div class="persona-hud">
+      <div class="allowance-indicator">
+        <span style="font-size:11px; text-transform:uppercase;">Daily Cap:</span>
+        <span id="hud-user-allowance">--</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Navigation Tabs -->
+  <nav class="main-nav" role="navigation" aria-label="Main Navigation">
+    <button class="nav-tab active" data-tab="tab-feed">
+      Find a Partner & Listings
+    </button>
+    <button class="nav-tab" data-tab="tab-session">
+      Study Session & HUD
+    </button>
+    <button class="nav-tab" data-tab="tab-profile">
+      Profile & Partner History
+    </button>
+    <button class="nav-tab" data-tab="tab-audit">
+      Audit Log & Invariants Verification
+    </button>
+  </nav>
+
+  <!-- Main View Container -->
+  <main class="app-container">
+
+    <!-- VIEW 1: FEED & FIND A PARTNER -->
+    <section id="tab-feed" class="view-panel active" aria-label="Find a Partner Feed">
+      <div class="breadcrumb-trail">
+        <span>Communities</span> &gt;
+        <span>Software Engineering (SE-2416)</span> &gt;
+        <span class="active">Channel Feed</span>
+      </div>
+
+      <!-- Channel & Membership Bar (Priority 1) -->
+      <div class="channel-bar">
+        <div class="channel-selector-group">
+          <label for="community-select">Community:</label>
+          <select id="community-select">
+            <option value="comm-se">Software Engineering (SE-2416)</option>
+            <option value="comm-ds">Data Science (DS-2410)</option>
+          </select>
+        </div>
+
+        <div class="channel-selector-group">
+          <label for="channel-select">Channel:</label>
+          <select id="channel-select">
+            <option value="chan-algo">#algorithms-and-ds</option>
+            <option value="chan-web">#web-engineering</option>
+            <option value="chan-sys">#system-architecture</option>
+            <option value="chan-ml">#ml-foundations</option>
+          </select>
+        </div>
+
+        <!-- Channel Membership Status & Join/Leave Action -->
+        <div class="channel-selector-group" style="margin-left: 8px;">
+          <span id="channel-member-badge" class="tag">Checking...</span>
+          <button id="channel-join-leave-btn" class="btn btn-secondary" style="padding:4px 10px; font-size:12px;">Join</button>
+        </div>
+
+        <div style="margin-left: auto;">
+          <button class="btn btn-primary" onclick="window.PLP.openCreateModal()">+ Create Study Listing</button>
+        </div>
+      </div>
+
+      <!-- Sorting & Eligibility Controls -->
+      <div class="feed-controls">
+        <div class="sort-toggle-group">
+          <span style="font-size:13px; font-weight:600; color:var(--text-muted);">Sort Order:</span>
+          <button id="sort-compat" class="sort-btn active" onclick="window.PLP.setFeedSort('compatibility')">
+            ★ Compatibility Ranking (0.40T + 0.35G + 0.25L)
+          </button>
+          <button id="sort-chrono" class="sort-btn" onclick="window.PLP.setFeedSort('chronological')">
+            ⏱ Chronological (Newest First)
+          </button>
+        </div>
+
+        <div class="eligibility-note">
+          <span style="color:var(--success); font-weight:700;">✓ Invariant #11:</span> Both sort views use identical eligibility filters (channel membership, open status, future date, language, no blocking, no collisions).
+        </div>
+      </div>
+
+      <div id="listing-feed-grid" class="listing-grid">
+        <!-- Injected via app.js renderFeed() -->
+      </div>
+    </section>
+
+    <!-- VIEW 2: ACTIVE SESSION ROOM & HUD -->
+    <section id="tab-session" class="view-panel" aria-label="Study Session Room">
+      <div id="session-view-container">
+        <!-- Injected via app.js renderSessionView() -->
+      </div>
+    </section>
+
+    <!-- VIEW 3: PROFILE & PARTNER HISTORY -->
+    <section id="tab-profile" class="view-panel" aria-label="Profile and History">
+      <div id="profile-view-container">
+        <!-- Injected via app.js renderProfileView() -->
+      </div>
+    </section>
+
+    <!-- VIEW 4: AUDIT LOG & ACCURATE INVARIANTS STATUS -->
+    <section id="tab-audit" class="view-panel" aria-label="Audit Log and Invariants">
+      <div class="section-header">
+        <div>
+          <h2>System Audit Log & Invariants Verification Status</h2>
+          <p style="font-size:13px; color:var(--text-muted);">
+            Accurate verification coverage of the 20 Consolidated Invariants for this client-side prototype.
+          </p>
+        </div>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:20px;">
+        <!-- Invariants Checklist with Honest Statuses (Priority 4) -->
+        <div style="background:white; border:1px solid var(--border); border-radius:var(--radius-lg); padding:20px;">
+          <h3 style="font-size:16px; margin-bottom:6px;">Astra 20 Consolidated Invariants Implementation Coverage</h3>
+          <p style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">
+            Explicit distinction between demonstrated prototype features, simulated scenarios, and working-V1 backend requirements:
+          </p>
+          <div class="invariants-checklist">
+            <div class="invariant-item"><span class="inv-badge demo">Demonstrated</span> 1. Status & Evidence (180m Confirmed; UTC/Grace/Mutual Proposed)</div>
+            <div class="invariant-item"><span class="inv-badge demo">Demonstrated</span> 2. Formal Specification Benchmarks (C-01..04, A-01..07, O-01..03, S-01)</div>
+            <div class="invariant-item"><span class="inv-badge sim">Simulation only</span> 3. Lock Ordering (simulated UUID sort; real PostgreSQL locks in V1)</div>
+            <div class="invariant-item"><span class="inv-badge sim">Simulation only</span> 4. Cross-Listing Collisions (409 conflict simulated in-memory)</div>
+            <div class="invariant-item"><span class="inv-badge demo">Demonstrated</span> 5. Derived Acceptance (recheck eligibility; respondent from record)</div>
+            <div class="invariant-item"><span class="inv-badge demo">Demonstrated</span> 6. Booking Uniqueness (UNIQUE(listing_id), user_a != user_b)</div>
+            <div class="invariant-item"><span class="inv-badge demo">Demonstrated</span> 7. Interval Semantics (half-open [start, end), back-to-back allowed)</div>
+            <div class="invariant-item"><span class="inv-badge demo">Demonstrated</span> 8. Response Row Reuse (UNIQUE(listing_id, respondent_id), withdrawn → pending)</div>
+            <div class="invariant-item"><span class="inv-badge demo">Demonstrated</span> 9. Explicit Dated Availability ([starts_at, ends_at) TIMESTAMPTZ)</div>
+            <div class="invariant-item"><span class="inv-badge demo">Demonstrated</span> 10. Matching Preference Inputs (author_level only, no invented scores)</div>
+            <div class="invariant-item"><span class="inv-badge demo">Demonstrated</span> 11. Identical Eligibility Filters (chronological & ranked)</div>
+            <div class="invariant-item"><span class="inv-badge demo">Demonstrated</span> 12. Authoritative Time Representation (integer seconds, 10,800s cap)</div>
+            <div class="invariant-item"><span class="inv-badge demo">Demonstrated</span> 13. Deterministic Termination Priority (blocked > allowance > scheduled > grace > manual)</div>
+            <div class="invariant-item"><span class="inv-badge demo">Demonstrated</span> 14. Midnight Exhaustion Policy (exact midnight termination, no revival)</div>
+            <div class="invariant-item"><span class="inv-badge demo">Demonstrated</span> 15. Atomic Ledger Finalization (UNIQUE(session_id, user_id, utc_date))</div>
+            <div class="invariant-item"><span class="inv-badge demo">Demonstrated</span> 16. Post-Session Review Decoupling (>= 300s threshold, independent of outcome)</div>
+            <div class="invariant-item"><span class="inv-badge demo">Demonstrated</span> 17. Outcome Mutual Confirmation (version-safe, 409 conflict on stale write)</div>
+            <div class="invariant-item"><span class="inv-badge demo">Demonstrated</span> 18. Blocking Propagation (active session ends with 'blocked', read-only archive)</div>
+            <div class="invariant-item"><span class="inv-badge demo">Demonstrated</span> 19. Exact Five Terminal Reasons (manual_exit, scheduled_end, allowance_exhaustion, connection_interruption, blocked)</div>
+            <div class="invariant-item"><span class="inv-badge v1">Working-V1</span> 20. Durable Server Persistence & Real WebSockets / WebRTC Networking</div>
+          </div>
+        </div>
+
+        <!-- Real-Time Audit Log Terminal -->
+        <div>
+          <h3 style="font-size:16px; margin-bottom:8px;">Live Transaction & State Machine Log</h3>
+          <div id="audit-log-entries" class="audit-log-panel">
+            <!-- Injected via renderAuditLog() -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL: CREATE STUDY LISTING (PRIORITY 1 VALIDATION) -->
+  <div id="modal-create-listing" class="modal-overlay" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="modal-create-title">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modal-create-title">Create Study Listing</h3>
+        <button class="close-btn" onclick="window.PLP.closeCreateModal()" aria-label="Close modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="new-listing-title">Listing Title *:</label>
+          <input type="text" id="new-listing-title" placeholder="e.g. Graph Traversal: Dijkstra Algorithm Pair Programming">
+        </div>
+
+        <div class="form-group">
+          <label for="new-listing-tags">Topic Tags (comma-separated) *:</label>
+          <input type="text" id="new-listing-tags" placeholder="algorithms, graphs, python">
+          <span class="form-hint">Stored as Postgres TEXT[]. At least one tag required.</span>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <div class="form-group">
+            <label for="new-listing-level">Your Knowledge Level *:</label>
+            <select id="new-listing-level">
+              <option value="beginner">Beginner</option>
+              <option value="intermediate" selected>Intermediate</option>
+              <option value="advanced">Advanced</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="new-listing-lang">Communication Language *:</label>
+            <select id="new-listing-lang">
+              <option value="en" selected>English (en)</option>
+              <option value="ru">Russian (ru)</option>
+              <option value="kk">Kazakh (kk)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="new-listing-goal">Study Goal:</label>
+          <select id="new-listing-goal">
+            <option value="concept_mastery">Concept Mastery</option>
+            <option value="exam_prep">Exam Prep</option>
+            <option value="assignment_help">Assignment Help</option>
+            <option value="code_review">Code Review</option>
+          </select>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <div class="form-group">
+            <label for="new-listing-start">Scheduled Start (Local) *:</label>
+            <input type="datetime-local" id="new-listing-start" value="2026-10-25T14:00">
+          </div>
+          <div class="form-group">
+            <label for="new-listing-end">Scheduled End (Local) *:</label>
+            <input type="datetime-local" id="new-listing-end" value="2026-10-25T15:00">
+          </div>
+        </div>
+        <span class="form-hint">Must be future start relative to demo clock. Duration must be 15 to 180 minutes.</span>
+
+        <div class="form-group">
+          <label for="new-listing-notes">Study Notes / Preparation:</label>
+          <textarea id="new-listing-notes" rows="2" placeholder="Brief outline of topics to work on..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="window.PLP.closeCreateModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="window.PLP.submitCreateListing()">Publish Listing</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: RESPOND TO LISTING -->
+  <div id="modal-response" class="modal-overlay" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="modal-respond-title">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modal-respond-title">Respond to Study Listing</h3>
+        <button class="close-btn" onclick="window.PLP.closeResponseModal()" aria-label="Close modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="modal-respond-listing-id">
+        <div style="background:#f8fafc; padding:12px; border-radius:var(--radius-sm); border:1px solid var(--border); margin-bottom:12px;">
+          <div style="font-size:12px; color:var(--text-muted);">Responding to:</div>
+          <strong id="modal-respond-listing-title">Listing Title</strong>
+        </div>
+
+        <div class="form-group">
+          <label for="modal-respond-slot">Proposed Time Slot:</label>
+          <input type="text" id="modal-respond-slot" readonly>
+        </div>
+
+        <div class="form-group">
+          <label for="modal-respond-msg">Message to Author:</label>
+          <textarea id="modal-respond-msg" rows="3" placeholder="Explain your background, goals for this session, and what you would like to work on..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="window.PLP.closeResponseModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="window.PLP.submitModalResponse()">Send Response</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: VIEW RESPONSES (FOR AUTHOR) -->
+  <div id="modal-view-responses" class="modal-overlay" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="modal-view-responses-title">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modal-view-responses-title">Manage Listing Responses</h3>
+        <button class="close-btn" onclick="window.PLP.closeResponsesModal()" aria-label="Close modal">&times;</button>
+      </div>
+      <div class="modal-body" id="modal-responses-body">
+        <!-- Injected dynamically -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="window.PLP.closeResponsesModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
